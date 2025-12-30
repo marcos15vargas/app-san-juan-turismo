@@ -1,0 +1,68 @@
+---
+interface Props {
+	title: string;
+}
+
+const { title } = Astro.props;
+---
+
+<!doctype html>
+<html lang="es">
+	<head>
+		<meta charset="UTF-8" />
+		<meta name="viewport" content="width=device-width" />
+		<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+		<title>{title} | Sistema de Turismo San Juan</title>
+		<link rel="preconnect" href="https://fonts.googleapis.com">
+		<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+		<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+	</head>
+	<body class="bg-gray-50 font-['Inter'] text-slate-900">
+		<nav class="bg-blue-900 text-white shadow-md">
+			<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+				<div class="flex justify-between h-16 items-center">
+					<div class="flex items-center gap-2">
+						<div class="w-8 h-8 bg-white rounded-full flex items-center justify-center">
+							<span class="text-blue-900 font-bold">SJ</span>
+						</div>
+						<span class="font-semibold text-lg tracking-tight">Turismo San Juan <span class="font-light text-blue-200">| Datos</span></span>
+					</div>
+					<div class="flex items-center gap-4">
+						<button id="logout-btn" class="hidden text-sm bg-blue-800 hover:bg-red-700 px-4 py-2 rounded-lg transition-colors">
+							Cerrar Sesión
+						</button>
+					</div>
+				</div>
+			</div>
+		</nav>
+
+		<slot />
+
+		<footer class="mt-auto py-8 text-center text-gray-400 text-sm">
+			&copy; 2025 Gobierno de San Juan - Ministerio de Turismo y Cultura
+		</footer>
+
+		<script>
+			import { supabase } from '../lib/supabase';
+
+			// Mostrar/Ocultar botón de logout según sesión
+			const logoutBtn = document.getElementById('logout-btn');
+			
+			supabase.auth.onAuthStateChange((event, session) => {
+				if (session) {
+					logoutBtn?.classList.remove('hidden');
+				} else {
+					logoutBtn?.classList.add('hidden');
+				}
+			});
+
+			logoutBtn?.addEventListener('click', async () => {
+				await supabase.auth.signOut();
+				window.location.href = '/';
+			});
+		</script>
+	</body>
+</html>
+<style>
+	@import "tailwindcss";
+</style>
