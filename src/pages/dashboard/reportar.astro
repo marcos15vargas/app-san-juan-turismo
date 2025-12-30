@@ -62,31 +62,31 @@ import Layout from '../../layouts/Layout.astro';
         <div id="section-museo" class="hidden space-y-8">
           <div class="space-y-4">
             <h3 class="text-lg font-bold text-orange-700 flex items-center gap-2">Control de Afluencia</h3>
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
               <div class="md:col-span-2 space-y-1">
                 <label class="text-sm font-bold text-slate-700">Total de Visitantes del Día</label>
-                <input type="number" min="0" name="total_visitantes" class="w-full p-4 border-2 border-orange-100 rounded-xl outline-none focus:border-orange-500 text-xl font-bold" placeholder="0">
+                <input type="number" min="0" name="total_visitantes" class="w-full py-2 pl-3 border-2 rounded-xl outline-none focus:border-orange-500 text-xl font-bold" placeholder="0">
               </div>
               
               <div class="space-y-1">
                 <label class="text-xs font-bold text-slate-500 uppercase tracking-wider">Visitantes Locales (San Juan)</label>
-                <input type="number" min="0" name="visitantes_locales" class="w-full p-3 border rounded-xl focus:ring-2 focus:ring-orange-500 outline-none" placeholder="0">
+                <input type="number" min="0" name="visitantes_locales" class="w-full py-2 pl-3 border rounded-xl focus:ring-2 focus:ring-orange-500 outline-none" placeholder="0">
               </div>
               
               <div class="space-y-1">
                 <label class="text-xs font-bold text-slate-500 uppercase tracking-wider">Visitantes Nacionales (Argentina)</label>
-                <input type="number" min="0" name="visitantes_nacionales" class="w-full p-3 border rounded-xl focus:ring-2 focus:ring-orange-500 outline-none" placeholder="0">
+                <input type="number" min="0" name="visitantes_nacionales" class="w-full py-2 pl-3 border rounded-xl focus:ring-2 focus:ring-orange-500 outline-none" placeholder="0">
               </div>
 
               <div class="space-y-1 md:col-span-2">
                 <label class="text-xs font-bold text-slate-500 uppercase tracking-wider">Visitantes Internacionales</label>
-                <input type="number" min="0" name="visitantes_internacionales" class="w-full p-3 border rounded-xl focus:ring-2 focus:ring-orange-500 outline-none" placeholder="0">
+                <input type="number" min="0" name="visitantes_internacionales" class="w-full py-2 pl-3 border rounded-xl focus:ring-2 focus:ring-orange-500 outline-none" placeholder="0">
               </div>
             </div>
           </div>
         </div>
 
-        <button type="submit" class="w-full bg-slate-900 text-white py-5 rounded-2xl font-bold shadow-lg hover:bg-black transition-all flex items-center justify-center gap-3">
+        <button type="submit" class="w-full  bg-slate-900 text-white py-5 rounded-2xl font-bold shadow-lg hover:bg-black transition-all flex items-center justify-center gap-3">
           ENVIAR REPORTE OFICIAL
         </button>
       </form>
