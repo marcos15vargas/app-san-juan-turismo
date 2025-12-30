@@ -75,10 +75,13 @@ import Layout from '../../layouts/Layout.astro';
   import { supabase } from '../../lib/supabase';
   import Chart from 'chart.js/auto';
   import { jsPDF } from 'jspdf';
+  import autoTable from 'jspdf-autotable';
 
   let userProfile: any = null;
   let chartHoteles: any = null;
   let chartMuseos: any = null;
+  let currentDataHoteles: any[] = [];
+  let currentDataMuseos: any[] = [];
 
   async function initDashboard() {
     const { data: { user } } = await supabase.auth.getUser();
@@ -94,8 +97,8 @@ import Layout from '../../layouts/Layout.astro';
       
       const actions = document.getElementById('action-buttons');
       if (actions) {
-        actions.innerHTML = `<button id="btn-pdf" class="bg-slate-900 text-white px-6 py-3 rounded-xl font-bold shadow-lg hover:bg-black transition-all">EXPORTAR INFORME PDF</button>`;
-        document.getElementById('btn-pdf')?.addEventListener('click', exportarPDFDirecto);
+        actions.innerHTML = `<button id="btn-pdf" class="bg-slate-900 text-white px-6 py-3 rounded-xl font-bold shadow-lg hover:bg-black transition-all">DESCARGAR INFORME COMPLETO</button>`;
+        document.getElementById('btn-pdf')?.addEventListener('click', exportarPDFPro);
       }
       cargarTodo();
     } else {
@@ -104,82 +107,112 @@ import Layout from '../../layouts/Layout.astro';
     }
   }
 
-  // --- RENDERIZADO DE GRÁFICOS ---
   function renderChartHoteles(data: any[]) {
     const ctx = document.getElementById('chart-hoteles') as HTMLCanvasElement;
     if (chartHoteles) chartHoteles.destroy();
+    // Forzamos mayor resolución en el canvas
+    ctx.width = ctx.parentElement!.offsetWidth * 2;
+    ctx.height = 300 * 2;
+
     chartHoteles = new Chart(ctx, {
       type: 'line',
       data: {
         labels: [...data].reverse().map(r => new Date(r.fecha_reporte).toLocaleDateString()),
         datasets: [{ label: 'Huéspedes', data: [...data].reverse().map(r => r.total_huespedes), borderColor: '#3b82f6', tension: 0.4, fill: true, backgroundColor: 'rgba(59, 130, 246, 0.1)' }]
       },
-      options: { maintainAspectRatio: false, animation: false }
+      options: { maintainAspectRatio: false, devicePixelRatio: 2 }
     });
   }
 
   function renderChartMuseos(data: any[]) {
     const ctx = document.getElementById('chart-museos') as HTMLCanvasElement;
     if (chartMuseos) chartMuseos.destroy();
+    ctx.width = ctx.parentElement!.offsetWidth * 2;
+    ctx.height = 300 * 2;
+
     const t = data.reduce((acc, c) => ({ l: acc.l + (c.visitantes_locales || 0), n: acc.n + (c.visitantes_nacionales || 0) }), { l: 0, n: 0 });
     chartMuseos = new Chart(ctx, {
       type: 'doughnut',
       data: { labels: ['Locales', 'Nacionales'], datasets: [{ data: [t.l, t.n], backgroundColor: ['#f97316', '#fbbf24'] }] },
-      options: { maintainAspectRatio: false, animation: false }
+      options: { maintainAspectRatio: false, devicePixelRatio: 2 }
     });
   }
 
-  // --- NUEVA FUNCIÓN PDF (SIN HTML2CANVAS) ---
-  function exportarPDFDirecto() {
+  async function exportarPDFPro() {
     const btn = document.getElementById('btn-pdf') as HTMLButtonElement;
-    btn.textContent = "Generando...";
+    btn.textContent = "Procesando...";
     btn.disabled = true;
 
     try {
       const doc = new jsPDF('p', 'mm', 'a4');
       const pageWidth = doc.internal.pageSize.getWidth();
 
-      // Encabezado
-      doc.setFontSize(22);
-      doc.setTextColor(15, 23, 42);
-      doc.text("Informe Turístico", 14, 25);
-      
+      // Página 1: Hotelería
+      doc.setFillColor(30, 41, 59);
+      doc.rect(0, 0, pageWidth, 35, 'F');
+      doc.setTextColor(255, 255, 255);
+      doc.setFontSize(20);
+      doc.text("Informe de Gestión Turística", 14, 22);
       doc.setFontSize(10);
-      doc.setTextColor(100, 116, 139);
-      doc.text(`Fecha del reporte: ${new Date().toLocaleString()}`, 14, 33);
-      doc.line(14, 36, pageWidth - 14, 36);
+      doc.text(`Sector: Hotelería | Fecha: ${new Date().toLocaleDateString()}`, 14, 30);
 
-      // Capturar Chart 1 (Hoteles)
       const canvasHoteles = document.getElementById('chart-hoteles') as HTMLCanvasElement;
       const imgHoteles = canvasHoteles.toDataURL('image/png', 1.0);
-      doc.setFontSize(14);
       doc.setTextColor(30, 41, 59);
-      doc.text("Tendencia de Ocupación Hotelera", 14, 48);
-      doc.addImage(imgHoteles, 'PNG', 14, 52, 180, 80);
+      doc.setFontSize(14);
+      doc.text("Tendencia de Ocupación", 14, 45);
+      doc.addImage(imgHoteles, 'PNG', 14, 50, 180, 70);
 
-      // Capturar Chart 2 (Museos)
+      autoTable(doc, {
+        startY: 125,
+        head: [['Fecha', 'Entidad', 'Huéspedes']],
+        body: currentDataHoteles.map(r => [new Date(r.fecha_reporte).toLocaleDateString(), r.entidades.nombre, r.total_huespedes]),
+        headStyles: { fillColor: [59, 130, 246] },
+        theme: 'striped'
+      });
+
+      // Página 2: Museos
+      doc.addPage();
+      doc.setFillColor(30, 41, 59);
+      doc.rect(0, 0, pageWidth, 35, 'F');
+      doc.setTextColor(255, 255, 255);
+      doc.setFontSize(20);
+      doc.text("Informe de Gestión Turística", 14, 22);
+      doc.setFontSize(10);
+      doc.text(`Sector: Cultura y Museos | Fecha: ${new Date().toLocaleDateString()}`, 14, 30);
+
       const canvasMuseos = document.getElementById('chart-museos') as HTMLCanvasElement;
       const imgMuseos = canvasMuseos.toDataURL('image/png', 1.0);
-      doc.text("Origen de Visitantes (Museos)", 14, 145);
-      doc.addImage(imgMuseos, 'PNG', 45, 150, 120, 90);
+      doc.setTextColor(30, 41, 59);
+      doc.setFontSize(14);
+      doc.text("Distribución de Visitantes", 14, 45);
+      doc.addImage(imgMuseos, 'PNG', 50, 50, 100, 80);
 
-      doc.save(`Informe_Gobierno_${new Date().getTime()}.pdf`);
+      autoTable(doc, {
+        startY: 135,
+        head: [['Fecha', 'Museo', 'Total Visitantes']],
+        body: currentDataMuseos.map(r => [new Date(r.fecha_reporte).toLocaleDateString(), r.entidades.nombre, r.total_visitantes]),
+        headStyles: { fillColor: [249, 115, 22] },
+        theme: 'striped'
+      });
+
+      doc.save("Reporte_Turismo_Oficial.pdf");
     } catch (err) {
       console.error(err);
-      alert("Error al crear el PDF");
+      alert("Error al generar PDF");
     } finally {
-      btn.textContent = "EXPORTAR INFORME PDF";
+      btn.textContent = "DESCARGAR INFORME COMPLETO";
       btn.disabled = false;
     }
   }
 
-  // Lógica de carga (Hoteles/Museos) simplificada
   async function cargarDatosHotel(id = null) {
     let q = supabase.from('reportes_hoteleria').select('*, entidades(nombre)').order('fecha_reporte', { ascending: false });
     if (id) q = q.eq('entidad_id', id);
     const { data } = await q;
     if (data) {
-      document.getElementById('tabla-hoteles')!.innerHTML = data.map(r => `<tr class="hover:bg-slate-50"><td class="px-6 py-4">${new Date(r.fecha_reporte).toLocaleDateString()}</td><td class="px-6 py-4">${r.entidades.nombre}</td><td class="px-6 py-4">${r.total_huespedes}</td><td class="px-6 py-4 text-right"><button onclick="confirmarEliminacion('${r.id}', 'reportes_hoteleria')" class="text-red-500">Borrar</button></td></tr>`).join('');
+      currentDataHoteles = data;
+      document.getElementById('tabla-hoteles')!.innerHTML = data.map(r => `<tr class="hover:bg-slate-50"><td class="px-6 py-4">${new Date(r.fecha_reporte).toLocaleDateString()}</td><td class="px-6 py-4 font-medium">${r.entidades.nombre}</td><td class="px-6 py-4">${r.total_huespedes}</td><td class="px-6 py-4 text-right"><button onclick="confirmarEliminacion('${r.id}', 'reportes_hoteleria')" class="text-red-500 font-bold">Borrar</button></td></tr>`).join('');
       if (userProfile.rol === 'admin_gobierno') renderChartHoteles(data);
     }
   }
@@ -189,7 +222,8 @@ import Layout from '../../layouts/Layout.astro';
     if (id) q = q.eq('entidad_id', id);
     const { data } = await q;
     if (data) {
-      document.getElementById('tabla-museos')!.innerHTML = data.map(r => `<tr class="hover:bg-slate-50"><td class="px-6 py-4">${new Date(r.fecha_reporte).toLocaleDateString()}</td><td class="px-6 py-4">${r.entidades.nombre}</td><td class="px-6 py-4">${r.total_visitantes}</td><td class="px-6 py-4 text-right"><button onclick="confirmarEliminacion('${r.id}', 'reportes_museos')" class="text-red-500">Borrar</button></td></tr>`).join('');
+      currentDataMuseos = data;
+      document.getElementById('tabla-museos')!.innerHTML = data.map(r => `<tr class="hover:bg-slate-50"><td class="px-6 py-4">${new Date(r.fecha_reporte).toLocaleDateString()}</td><td class="px-6 py-4 font-medium">${r.entidades.nombre}</td><td class="px-6 py-4">${r.total_visitantes}</td><td class="px-6 py-4 text-right"><button onclick="confirmarEliminacion('${r.id}', 'reportes_museos')" class="text-red-500 font-bold">Borrar</button></td></tr>`).join('');
       if (userProfile.rol === 'admin_gobierno') renderChartMuseos(data);
     }
   }
