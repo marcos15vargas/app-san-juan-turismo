@@ -1,0 +1,263 @@
+---
+import Layout from '../../layouts/Layout.astro';
+---
+
+<Layout title="Gestión de Entidades">
+  <main class="max-w-4xl mx-auto py-10 px-4">
+    <div class="mb-8 flex justify-between items-end">
+      <div>
+        <h1 class="text-3xl font-bold text-slate-900">Gestión de Entidades</h1>
+        <p class="text-slate-500">Registrar nuevos establecimientos y operadores</p>
+      </div>
+      <a href="/dashboard" class="text-blue-600 hover:underline text-sm font-medium">← Volver al Dashboard</a>
+    </div>
+
+    <form id="form-alta" class="bg-white shadow-xl rounded-2xl overflow-hidden border border-slate-200">
+      <div class="p-8 space-y-6">
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div class="space-y-2">
+            <label class="block text-sm font-bold text-slate-700">Nombre del Establecimiento</label>
+            <input type="text" name="nombre" required placeholder="Ej: Hotel del Valle" class="w-full p-3 border rounded-xl focus:ring-2 focus:ring-blue-500 outline-none transition-all">
+          </div>
+          <div class="space-y-2">
+            <label class="block text-sm font-bold text-slate-700">Departamento</label>
+            <select name="departamento" required class="w-full p-3 border rounded-xl outline-none bg-white">
+              <option value="Albardón">Albardón</option>
+              <option value="Angaco">Angaco</option>
+              <option value="Calingasta">Calingasta</option>
+              <option value="Capital">Capital</option>
+              <option value="Caucete">Caucete</option>
+              <option value="Chimbas">Chimbas</option>
+              <option value="Iglesia">Iglesia</option>
+              <option value="Jáchal">Jáchal</option>
+              <option value="9 de Julio">9 de Julio</option>
+              <option value="Pocito">Pocito</option>
+              <option value="Rawson">Rawson</option>
+              <option value="Rivadavia">Rivadavia</option>
+              <option value="San Martín">San Martín</option>
+              <option value="Santa Lucía">Santa Lucía</option>
+              <option value="Sarmiento">Sarmiento</option>
+              <option value="Ullum">Ullum</option>
+              <option value="Valle Fértil">Valle Fértil</option>
+              <option value="25 de Mayo">25 de Mayo</option>
+              <option value="Zonda">Zonda</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div class="space-y-2">
+            <label class="block text-sm font-bold text-slate-700">Tipo de Entidad</label>
+            <select name="tipo" required class="w-full p-3 border rounded-xl outline-none bg-white">
+              <option value="hotel">Hotel / Alojamiento</option>
+              <option value="museo">Museo / Sitio Cultural</option>
+            </select>
+          </div>
+          <div class="space-y-2">
+            <label class="block text-sm font-bold text-slate-700">Capacidad Máxima (Plazas/Aforo)</label>
+            <input type="number" name="capacidad" required placeholder="100" class="w-full p-3 border rounded-xl outline-none transition-all">
+          </div>
+        </div>
+
+        <hr class="border-slate-100">
+
+        <h3 class="font-bold text-slate-800 text-lg">Datos del Operador Responsable</h3>
+        <p class="text-xs text-slate-400 -mt-4 italic">Se vinculará un acceso para que este usuario reporte datos.</p>
+        
+        <div class="space-y-4">
+          <div class="space-y-2">
+            <label class="block text-sm font-bold text-slate-700">Nombre del Responsable</label>
+            <input type="text" name="operador_nombre" required placeholder="Juan Pérez" class="w-full p-3 border rounded-xl outline-none transition-all">
+          </div>
+          <div class="space-y-2">
+            <label class="block text-sm font-bold text-slate-700">Email de Acceso</label>
+            <input type="email" name="email" required placeholder="contacto@hotel.com" class="w-full p-3 border rounded-xl outline-none transition-all">
+          </div>
+        </div>
+      </div>
+
+      <div class="bg-slate-50 p-6 border-t border-slate-200">
+        <button type="submit" class="w-full bg-blue-900 text-white py-4 rounded-xl font-bold hover:bg-blue-800 transition-all shadow-lg active:scale-[0.98]">
+          DAR DE ALTA ENTIDAD Y USUARIO
+        </button>
+      </div>
+    </form>
+
+    <div id="success-card" class="hidden mt-6 bg-emerald-50 border-2 border-emerald-200 p-6 rounded-2xl shadow-sm">
+      <div class="flex items-start gap-4">
+        <div class="bg-emerald-500 text-white p-2 rounded-full">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+          </svg>
+        </div>
+        <div class="flex-1">
+          <h3 class="text-emerald-900 font-bold text-lg">¡Entidad y Usuario creados!</h3>
+          <p class="text-emerald-700 text-sm mb-4">Copia estos datos ahora. Por seguridad, no se podrán volver a ver.</p>
+          
+          <div class="bg-white border border-emerald-100 rounded-xl p-4 space-y-4 shadow-sm">
+            <div>
+              <div class="flex justify-between items-center mb-1">
+                <span class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Email de Acceso</span>
+                <button id="copy-email" class="text-blue-600 text-xs font-bold hover:underline">Copiar</button>
+              </div>
+              <div id="display-email" class="font-mono text-slate-800 bg-slate-50 p-2 rounded border border-slate-100 break-all">---</div>
+            </div>
+            
+            <div>
+              <div class="flex justify-between items-center mb-1">
+                <span class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Contraseña</span>
+                <button id="copy-pass" class="text-blue-600 text-xs font-bold hover:underline">Copiar</button>
+              </div>
+              <div id="display-pass" class="font-mono text-xl font-bold text-slate-900 bg-slate-50 p-2 rounded border border-slate-100 tracking-wider">---</div>
+            </div>
+          </div>
+          
+          <button id="close-success" class="mt-4 text-emerald-700 text-xs font-medium hover:underline">Limpiar y continuar</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="mt-12 bg-white shadow-sm rounded-2xl border border-slate-200 overflow-hidden">
+      <div class="p-6 border-b border-slate-100 bg-slate-50 flex justify-between items-center">
+        <h3 class="font-bold text-slate-800">Establecimientos Registrados</h3>
+        <span id="entidades-count" class="bg-slate-200 text-slate-700 text-xs font-bold px-2 py-1 rounded-full">0</span>
+      </div>
+      <div class="overflow-x-auto">
+        <table class="w-full text-left text-sm">
+          <thead>
+            <tr class="bg-slate-50 text-slate-500 uppercase text-xs">
+              <th class="px-6 py-3 font-semibold tracking-wider">Nombre</th>
+              <th class="px-6 py-3 font-semibold tracking-wider">Tipo</th>
+              <th class="px-6 py-3 font-semibold tracking-wider">Departamento</th>
+              <th class="px-6 py-3 font-semibold tracking-wider text-right">Capacidad</th>
+            </tr>
+          </thead>
+          <tbody id="lista-entidades" class="divide-y divide-slate-100">
+            <tr>
+              <td colspan="4" class="px-6 py-8 text-center text-slate-400 italic">Cargando establecimientos...</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </main>
+</Layout>
+
+<script>
+  import { supabase } from '../../lib/supabase';
+
+  const form = document.getElementById('form-alta') as HTMLFormElement;
+  const listaEntidades = document.getElementById('lista-entidades');
+  const countBadge = document.getElementById('entidades-count');
+  
+  // Elementos de la tarjeta de éxito
+  const successCard = document.getElementById('success-card');
+  const displayEmail = document.getElementById('display-email');
+  const displayPass = document.getElementById('display-pass');
+
+  async function cargarEntidades() {
+    const { data, error } = await supabase
+      .from('entidades')
+      .select('*')
+      .order('creado_en', { ascending: false });
+
+    if (error) {
+      console.error("Error cargando entidades:", error);
+      return;
+    }
+
+    if (countBadge) countBadge.textContent = data.length.toString();
+
+    if (listaEntidades) {
+      if (data.length === 0) {
+        listaEntidades.innerHTML = `<tr><td colspan="4" class="px-6 py-8 text-center text-slate-400">No hay establecimientos registrados</td></tr>`;
+        return;
+      }
+
+      listaEntidades.innerHTML = data.map(e => `
+        <tr class="hover:bg-slate-50 transition-colors">
+          <td class="px-6 py-4 font-medium text-slate-900">${e.nombre}</td>
+          <td class="px-6 py-4 text-center">
+            <span class="capitalize px-2 py-1 rounded-md text-[10px] font-bold ${e.tipo === 'hotel' ? 'bg-blue-100 text-blue-700' : 'bg-orange-100 text-orange-700'}">
+              ${e.tipo}
+            </span>
+          </td>
+          <td class="px-6 py-4 text-slate-600">${e.departamento}</td>
+          <td class="px-6 py-4 font-mono text-slate-500 text-right font-bold">${e.capacidad_maxima}</td>
+        </tr>
+      `).join('');
+    }
+  }
+
+  form?.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const fd = new FormData(form);
+    const btn = form.querySelector('button');
+    
+    if (btn) {
+      btn.innerText = "PROCESANDO ALTA...";
+      btn.disabled = true;
+    }
+
+    // Ocultar tarjeta anterior si existe
+    successCard?.classList.add('hidden');
+
+    try {
+      const response = await fetch('/api/crear-operador', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          nombre: fd.get('nombre'),
+          tipo: fd.get('tipo'),
+          departamento: fd.get('departamento'),
+          capacidad: parseInt(fd.get('capacidad') as string),
+          operador_nombre: fd.get('operador_nombre'),
+          email: fd.get('email')
+        })
+      });
+
+      const resultado = await response.json();
+
+      if (resultado.success) {
+        // Llenar y mostrar tarjeta de éxito
+        if (displayEmail) displayEmail.innerText = resultado.email;
+        if (displayPass) displayPass.innerText = resultado.password;
+        successCard?.classList.remove('hidden');
+        
+        // Scroll suave hasta la tarjeta
+        successCard?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        
+        form.reset();
+        cargarEntidades();
+      } else {
+        alert("Error en el servidor: " + (resultado.error || "Desconocido"));
+      }
+    } catch (err) {
+      alert("Error de conexión. Revisa la consola.");
+    } finally {
+      if (btn) {
+        btn.innerText = "DAR DE ALTA ENTIDAD Y USUARIO";
+        btn.disabled = false;
+      }
+    }
+  });
+
+  // Eventos de Copiado
+  document.getElementById('copy-email')?.addEventListener('click', () => {
+    const text = displayEmail?.innerText || "";
+    navigator.clipboard.writeText(text);
+    alert("Email copiado al portapapeles");
+  });
+
+  document.getElementById('copy-pass')?.addEventListener('click', () => {
+    const text = displayPass?.innerText || "";
+    navigator.clipboard.writeText(text);
+    alert("Contraseña copiada al portapapeles");
+  });
+
+  document.getElementById('close-success')?.addEventListener('click', () => {
+    successCard?.classList.add('hidden');
+  });
+
+  cargarEntidades();
+</script>
