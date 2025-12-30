@@ -1,16 +1,90 @@
 ---
-
+import Layout from '../layouts/Layout.astro';
 ---
 
-<html lang="en">
-	<head>
-		<meta charset="utf-8" />
-		<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-		<meta name="viewport" content="width=device-width" />
-		<meta name="generator" content={Astro.generator} />
-		<title>Astro</title>
-	</head>
-	<body>
-		<h1>Astro</h1>
-	</body>
-</html>
+<Layout title="Iniciar Sesión">
+  <main class="min-h-[80vh] flex items-center justify-center px-4">
+    <div class="max-w-md w-full bg-white rounded-2xl shadow-2xl border border-gray-100 p-8">
+      <div class="text-center mb-8">
+        <div class="inline-flex items-center justify-center w-16 h-16 bg-blue-100 text-blue-900 rounded-full mb-4">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+          </svg>
+        </div>
+        <h1 class="text-3xl font-bold text-gray-900">Portal de Turismo</h1>
+        <p class="text-gray-500 mt-2">Provincia de San Juan</p>
+      </div>
+
+      <form id="login-form" class="space-y-5">
+        <div>
+          <label for="email" class="block text-sm font-medium text-gray-700 mb-1">Correo Electrónico</label>
+          <input 
+            type="email" 
+            id="email" 
+            required 
+            placeholder="usuario@sanjuan.gov.ar"
+            class="w-full px-4 py-3 rounded-xl border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all"
+          />
+        </div>
+
+        <div>
+          <label for="password" class="block text-sm font-medium text-gray-700 mb-1">Contraseña</label>
+          <input 
+            type="password" 
+            id="password" 
+            required 
+            placeholder="••••••••"
+            class="w-full px-4 py-3 rounded-xl border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all"
+          />
+        </div>
+
+        <button 
+          type="submit" 
+          class="w-full bg-blue-900 hover:bg-blue-800 text-white font-bold py-3 rounded-xl shadow-lg transform active:scale-[0.98] transition-all"
+        >
+          Ingresar al Sistema
+        </button>
+      </form>
+
+      <div id="error-msg" class="hidden mt-4 p-3 bg-red-50 text-red-700 text-sm rounded-lg border border-red-100">
+      </div>
+    </div>
+  </main>
+</Layout>
+
+<script>
+  import { supabase } from '../lib/supabase';
+
+  const form = document.querySelector('#login-form') as HTMLFormElement;
+  const errorMsg = document.querySelector('#error-msg') as HTMLDivElement;
+
+  form?.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    errorMsg.classList.add('hidden');
+
+    const email = (document.querySelector('#email') as HTMLInputElement).value;
+    const password = (document.querySelector('#password') as HTMLInputElement).value;
+
+    // 1. Intentar Login
+    const { data, error } = await supabase.auth.signInWithPassword({ email, password });
+
+    if (error) {
+      errorMsg.textContent = "Credenciales inválidas. Por favor verifique sus datos.";
+      errorMsg.classList.remove('hidden');
+      return;
+    }
+
+    // 2. Obtener el ROL para redirigir
+    const { data: perfil, error: perfilError } = await supabase
+      .from('perfiles')
+      .select('rol')
+      .eq('id', data.user.id)
+      .single();
+
+    if (perfil?.rol === 'admin_gobierno') {
+      window.location.href = '/dashboard';
+    } else {
+      window.location.href = '/dashboard/reportar';
+    }
+  });
+</script>
