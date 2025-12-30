@@ -10,12 +10,20 @@ import Layout from '../../layouts/Layout.astro';
     </div>
     
     <div id="form-container" class="hidden bg-white p-8 rounded-2xl shadow-xl border border-slate-100">
-      <div class="mb-8 border-b border-slate-100 pb-6">
-        <h1 class="text-3xl font-bold text-slate-800" id="entidad-nombre">Cargar Reporte</h1>
-        <div class="flex items-center gap-2 mt-2 text-slate-500">
-          <span class="px-2 py-1 bg-slate-100 rounded text-xs font-bold uppercase tracking-wider" id="entidad-tipo">TIPO</span>
-          <span class="text-sm" id="entidad-departamento">Departamento</span>
+      <div class="mb-8 border-b border-slate-100 pb-6 flex justify-between items-start">
+        <div>
+          <h1 class="text-3xl font-bold text-slate-800" id="entidad-nombre">Cargar Reporte</h1>
+          <div class="flex items-center gap-2 mt-2 text-slate-500">
+            <span class="px-2 py-1 bg-slate-100 rounded text-xs font-bold uppercase tracking-wider" id="entidad-tipo">TIPO</span>
+            <span class="text-sm" id="entidad-departamento">Departamento</span>
+          </div>
         </div>
+        <a href="/dashboard" class="flex items-center gap-2 text-blue-600 hover:text-blue-800 font-medium text-sm transition-colors bg-blue-50 px-4 py-2 rounded-xl">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+          </svg>
+          Volver al Dashboard
+        </a>
       </div>
 
       <form id="dynamic-form" class="space-y-10">
@@ -62,31 +70,31 @@ import Layout from '../../layouts/Layout.astro';
         <div id="section-museo" class="hidden space-y-8">
           <div class="space-y-4">
             <h3 class="text-lg font-bold text-orange-700 flex items-center gap-2">Control de Afluencia</h3>
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div class="md:col-span-2 space-y-1">
                 <label class="text-sm font-bold text-slate-700">Total de Visitantes del Día</label>
-                <input type="number" min="0" name="total_visitantes" class="w-full py-2 pl-3 border-2 rounded-xl outline-none focus:border-orange-500 text-xl font-bold" placeholder="0">
+                <input type="number" min="0" name="total_visitantes" class="w-full p-4 border-2 border-orange-100 rounded-xl outline-none focus:border-orange-500 text-xl font-bold" placeholder="0">
               </div>
               
               <div class="space-y-1">
                 <label class="text-xs font-bold text-slate-500 uppercase tracking-wider">Visitantes Locales (San Juan)</label>
-                <input type="number" min="0" name="visitantes_locales" class="w-full py-2 pl-3 border rounded-xl focus:ring-2 focus:ring-orange-500 outline-none" placeholder="0">
+                <input type="number" min="0" name="visitantes_locales" class="w-full p-3 border rounded-xl focus:ring-2 focus:ring-orange-500 outline-none" placeholder="0">
               </div>
               
               <div class="space-y-1">
                 <label class="text-xs font-bold text-slate-500 uppercase tracking-wider">Visitantes Nacionales (Argentina)</label>
-                <input type="number" min="0" name="visitantes_nacionales" class="w-full py-2 pl-3 border rounded-xl focus:ring-2 focus:ring-orange-500 outline-none" placeholder="0">
+                <input type="number" min="0" name="visitantes_nacionales" class="w-full p-3 border rounded-xl focus:ring-2 focus:ring-orange-500 outline-none" placeholder="0">
               </div>
 
               <div class="space-y-1 md:col-span-2">
                 <label class="text-xs font-bold text-slate-500 uppercase tracking-wider">Visitantes Internacionales</label>
-                <input type="number" min="0" name="visitantes_internacionales" class="w-full py-2 pl-3 border rounded-xl focus:ring-2 focus:ring-orange-500 outline-none" placeholder="0">
+                <input type="number" min="0" name="visitantes_internacionales" class="w-full p-3 border rounded-xl focus:ring-2 focus:ring-orange-500 outline-none" placeholder="0">
               </div>
             </div>
           </div>
         </div>
 
-        <button type="submit" class="w-full  bg-slate-900 text-white py-5 rounded-2xl font-bold shadow-lg hover:bg-black transition-all flex items-center justify-center gap-3">
+        <button type="submit" class="w-full bg-slate-900 text-white py-5 rounded-2xl font-bold shadow-lg hover:bg-black transition-all flex items-center justify-center gap-3">
           ENVIAR REPORTE OFICIAL
         </button>
       </form>
@@ -127,12 +135,10 @@ import Layout from '../../layouts/Layout.astro';
     if (perfil.entidades.tipo === 'hotel') {
       document.getElementById('section-hotel')?.classList.remove('hidden');
       
-      // AUTO-LLENADO DE HABITACIONES TOTALES (Dato Fijo)
       const inputHabTotales = document.getElementById('field-total-habitaciones') as HTMLInputElement;
       if (inputHabTotales) {
         inputHabTotales.value = perfil.entidades.capacidad_maxima;
       }
-
     } else if (perfil.entidades.tipo === 'museo') {
       document.getElementById('section-museo')?.classList.remove('hidden');
     }
@@ -142,29 +148,54 @@ import Layout from '../../layouts/Layout.astro';
     e.preventDefault();
     const formData = new FormData(form);
     
+    // VALIDACIÓN MANUAL SEGÚN TIPO PARA EVITAR CAMPOS VACÍOS
+    const tipo = userProfile.entidades.tipo;
+    if (tipo === 'hotel') {
+      const habOcupadas = formData.get('habitaciones_ocupadas');
+      if (!habOcupadas || habOcupadas === "") {
+        alert("Por favor, ingresa las habitaciones ocupadas.");
+        return;
+      }
+    } else if (tipo === 'museo') {
+      const visitantes = formData.get('total_visitantes');
+      if (!visitantes || visitantes === "") {
+        alert("Por favor, ingresa el total de visitantes.");
+        return;
+      }
+    }
+
     const payload: any = {
       entidad_id: userProfile.entidad_id,
-      creado_por: userProfile.id
+      creado_por: userProfile.id,
+      fecha_reporte: new Date().toISOString().split('T')[0]
     };
 
+    // Solo procesar campos que pertenecen a la sección visible
+    const sectionId = tipo === 'hotel' ? 'section-hotel' : 'section-museo';
     formData.forEach((value, key) => {
-      if (value !== "") {
+      const inputInActiveSection = document.querySelector(`#${sectionId} [name="${key}"]`);
+      if (inputInActiveSection && value !== "") {
         payload[key] = key === 'estadia_promedio' ? parseFloat(value.toString()) : parseInt(value.toString());
       }
     });
 
-    const table = userProfile.entidades.tipo === 'hotel' ? 'reportes_hoteleria' : 'reportes_museos';
+    const table = tipo === 'hotel' ? 'reportes_hoteleria' : 'reportes_museos';
 
-    const { error } = await supabase.from(table).insert(payload);
+    const { error } = await supabase.from(table).insert([payload]);
 
     if (error) {
       alert("Error al enviar: " + error.message);
     } else {
-      alert("Reporte guardado exitosamente.");
-      // No reseteamos el valor fijo de total_habitaciones al limpiar el form
+      alert("✅ Reporte guardado exitosamente.");
+      
+      // Guardar el valor fijo de capacidad antes de resetear
       const habs = (document.getElementById('field-total-habitaciones') as HTMLInputElement)?.value;
       form.reset();
-      if (habs) (document.getElementById('field-total-habitaciones') as HTMLInputElement).value = habs;
+      
+      // Restaurar el valor fijo de capacidad_maxima después del reset
+      if (habs) {
+        (document.getElementById('field-total-habitaciones') as HTMLInputElement).value = habs;
+      }
     }
   });
 

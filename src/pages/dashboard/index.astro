@@ -2,187 +2,198 @@
 import Layout from '../../layouts/Layout.astro';
 ---
 
-<Layout title="Panel de Control Gubernamental">
-  <main class="max-w-7xl mx-auto px-4 py-8">
-    <header class="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-4">
+<Layout title="Panel de Control">
+  <main class="max-w-6xl mx-auto py-10 px-4">
+    <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-4">
       <div>
-        <h1 class="text-3xl font-bold text-slate-900 tracking-tight">Monitor Turístico Provincial</h1>
-        <p class="text-slate-500">San Juan - Gestión Basada en Datos Verificados</p>
+        <h1 class="text-3xl font-bold text-slate-900" id="welcome-title">Cargando Panel...</h1>
+        <p class="text-slate-500" id="welcome-subtitle">Bienvenido al sistema de estadísticas turísticas</p>
       </div>
-      
-      <div class="flex flex-col sm:flex-row items-center gap-4">
-        <div id="admin-actions" class="hidden">
-          <a 
-            href="/dashboard/gestion" 
-            class="flex items-center gap-2 bg-slate-800 hover:bg-slate-700 text-white px-4 py-2 rounded-lg font-medium transition-all shadow-sm border border-slate-700 text-sm"
-          >
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
-            </svg>
-            Gestionar Entidades
-          </a>
-        </div>
+      <div class="flex gap-3" id="action-buttons"></div>
+    </div>
 
-        <div class="bg-white p-2 rounded-xl shadow-sm border flex gap-2">
-          <button id="tab-hoteles" class="px-4 py-2 rounded-lg bg-blue-900 text-white font-medium transition-all">Hotelería</button>
-          <button id="tab-museos" class="px-4 py-2 rounded-lg text-slate-600 hover:bg-slate-100 transition-all">Cultura y Museos</button>
+    <div id="admin-charts" class="hidden grid grid-cols-1 md:grid-cols-2 gap-8 mb-10">
+      <div class="bg-white p-6 rounded-2xl shadow-xl border border-slate-200">
+        <h3 class="text-sm font-bold text-slate-400 uppercase tracking-widest mb-4 flex items-center gap-2">
+          <span class="w-3 h-3 bg-blue-500 rounded-full"></span>
+          Tendencia de Huéspedes
+        </h3>
+        <div class="h-[300px] w-full">
+          <canvas id="chart-hoteles"></canvas>
         </div>
       </div>
-    </header>
-
-    <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
-      <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-100">
-        <span class="text-xs font-bold text-slate-400 uppercase tracking-wider">Huéspedes Totales</span>
-        <div class="text-3xl font-bold text-slate-900 mt-1" id="stat-total-huespedes">0</div>
-      </div>
-      <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-100">
-        <span class="text-xs font-bold text-slate-400 uppercase tracking-wider">Ocupación Promedio</span>
-        <div class="text-3xl font-bold text-blue-600 mt-1" id="stat-avg-ocupacion">0%</div>
-      </div>
-      <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-100">
-        <span class="text-xs font-bold text-slate-400 uppercase tracking-wider">Visitantes Museos</span>
-        <div class="text-3xl font-bold text-orange-600 mt-1" id="stat-total-visitantes">0</div>
-      </div>
-      <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-100">
-        <span class="text-xs font-bold text-slate-400 uppercase tracking-wider">Estadía Promedio</span>
-        <div class="text-3xl font-bold text-slate-900 mt-1" id="stat-avg-estadia">0 nts</div>
+      <div class="bg-white p-6 rounded-2xl shadow-xl border border-slate-200">
+        <h3 class="text-sm font-bold text-slate-400 uppercase tracking-widest mb-4 flex items-center gap-2">
+          <span class="w-3 h-3 bg-orange-500 rounded-full"></span>
+          Distribución de Visitantes
+        </h3>
+        <div class="h-[300px] w-full">
+          <canvas id="chart-museos"></canvas>
+        </div>
       </div>
     </div>
 
-    <section id="content-hoteles" class="space-y-8">
-      <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-100">
-        <h3 class="text-lg font-bold mb-4">Ocupación por Departamento (Hotelería)</h3>
+    <div id="admin-filters" class="hidden mb-8 flex gap-4">
+        <button class="filter-btn active bg-slate-900 text-white px-4 py-2 rounded-lg text-sm font-bold" data-filter="todos">Todos</button>
+        <button class="filter-btn bg-white text-slate-600 px-4 py-2 rounded-lg text-sm font-bold border" data-filter="hotel">Hoteles</button>
+        <button class="filter-btn bg-white text-slate-600 px-4 py-2 rounded-lg text-sm font-bold border" data-filter="museo">Museos</button>
+    </div>
+
+    <div class="grid grid-cols-1 gap-8">
+      <section id="container-hoteles" class="bg-white shadow-xl rounded-2xl overflow-hidden border border-slate-200">
+        <div class="p-6 border-b border-slate-100 bg-blue-50/50">
+          <h2 class="font-bold text-blue-900">Reportes de Hotelería</h2>
+        </div>
         <div class="overflow-x-auto">
-          <table class="w-full text-left">
-            <thead>
-              <tr class="text-slate-400 text-sm uppercase">
-                <th class="pb-4 font-medium">Departamento</th>
-                <th class="pb-4 font-medium">Hab. Totales</th>
-                <th class="pb-4 font-medium">Hab. Ocupadas</th>
-                <th class="pb-4 font-medium text-right">% Ocupación</th>
-              </tr>
+          <table class="w-full text-left text-sm">
+            <thead class="bg-slate-50 text-slate-500 uppercase text-[10px]">
+              <tr><th class="px-6 py-4">Fecha</th><th class="px-6 py-4">Entidad</th><th class="px-6 py-4">Huéspedes</th><th class="px-6 py-4 text-right">Acciones</th></tr>
             </thead>
-            <tbody id="table-hoteles" class="text-slate-700">
-            </tbody>
+            <tbody id="tabla-hoteles" class="divide-y divide-slate-100"></tbody>
           </table>
         </div>
-      </div>
-    </section>
+      </section>
 
-    <section id="content-museos" class="hidden space-y-8">
-      <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-100">
-        <h3 class="text-lg font-bold mb-4">Afluencia en Sitios Culturales</h3>
-        <div id="list-museos" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+      <section id="container-museos" class="bg-white shadow-xl rounded-2xl overflow-hidden border border-slate-200">
+        <div class="p-6 border-b border-slate-100 bg-orange-50/50">
+          <h2 class="font-bold text-orange-900">Reportes de Museos</h2>
         </div>
-      </div>
-    </section>
+        <div class="overflow-x-auto">
+          <table class="w-full text-left text-sm">
+            <thead class="bg-slate-50 text-slate-500 uppercase text-[10px]">
+              <tr><th class="px-6 py-4">Fecha</th><th class="px-6 py-4">Entidad</th><th class="px-6 py-4">Total</th><th class="px-6 py-4 text-right">Acciones</th></tr>
+            </thead>
+            <tbody id="tabla-museos" class="divide-y divide-slate-100"></tbody>
+          </table>
+        </div>
+      </section>
+    </div>
   </main>
 </Layout>
 
 <script>
   import { supabase } from '../../lib/supabase';
+  import Chart from 'chart.js/auto';
+  import { jsPDF } from 'jspdf';
 
-  // Manejo de Tabs
-  const btnHoteles = document.getElementById('tab-hoteles');
-  const btnMuseos = document.getElementById('tab-museos');
-  const secHoteles = document.getElementById('content-hoteles');
-  const secMuseos = document.getElementById('content-museos');
+  let userProfile: any = null;
+  let chartHoteles: any = null;
+  let chartMuseos: any = null;
 
-  btnHoteles?.addEventListener('click', () => {
-    secHoteles?.classList.remove('hidden');
-    secMuseos?.classList.add('hidden');
-    btnHoteles.className = "px-4 py-2 rounded-lg bg-blue-900 text-white font-medium transition-all";
-    btnMuseos!.className = "px-4 py-2 rounded-lg text-slate-600 hover:bg-slate-100 transition-all";
-  });
-
-  btnMuseos?.addEventListener('click', () => {
-    secMuseos?.classList.remove('hidden');
-    secHoteles?.classList.add('hidden');
-    btnMuseos.className = "px-4 py-2 rounded-lg bg-orange-600 text-white font-medium transition-all";
-    btnHoteles!.className = "px-4 py-2 rounded-lg text-slate-600 hover:bg-slate-100 transition-all";
-  });
-
-  // FUNCIÓN PARA VERIFICAR ROL Y MOSTRAR BOTÓN DE GESTIÓN
-  async function checkAdminAccess() {
+  async function initDashboard() {
     const { data: { user } } = await supabase.auth.getUser();
-    if (!user) return;
+    if (!user) { window.location.href = '/'; return; }
 
-    const { data: perfil } = await supabase
-      .from('perfiles')
-      .select('rol')
-      .eq('id', user.id)
-      .single();
+    const { data: perfil } = await supabase.from('perfiles').select('*, entidades(*)').eq('id', user.id).single();
+    userProfile = perfil;
 
-    if (perfil?.rol === 'admin_gobierno') {
-      const adminActions = document.getElementById('admin-actions');
-      adminActions?.classList.remove('hidden');
+    if (perfil.rol === 'admin_gobierno') {
+      document.getElementById('welcome-title')!.textContent = "Panel de Gobierno";
+      document.getElementById('admin-filters')?.classList.remove('hidden');
+      document.getElementById('admin-charts')?.classList.remove('hidden');
+      
+      const actions = document.getElementById('action-buttons');
+      if (actions) {
+        actions.innerHTML = `<button id="btn-pdf" class="bg-slate-900 text-white px-6 py-3 rounded-xl font-bold shadow-lg hover:bg-black transition-all">EXPORTAR INFORME PDF</button>`;
+        document.getElementById('btn-pdf')?.addEventListener('click', exportarPDFDirecto);
+      }
+      cargarTodo();
+    } else {
+      document.getElementById('welcome-title')!.textContent = perfil.entidades.nombre;
+      perfil.entidades.tipo === 'hotel' ? cargarDatosHotel(perfil.entidad_id) : cargarDatosMuseo(perfil.entidad_id);
     }
   }
 
-  async function fetchData() {
-    const { data: hotelData } = await supabase
-      .from('reportes_hoteleria')
-      .select('*, entidades(nombre, departamento)');
-
-    const { data: museoData } = await supabase
-      .from('reportes_museos')
-      .select('*, entidades(nombre, departamento)');
-
-    if (hotelData) renderHoteles(hotelData);
-    if (museoData) renderMuseos(museoData);
+  // --- RENDERIZADO DE GRÁFICOS ---
+  function renderChartHoteles(data: any[]) {
+    const ctx = document.getElementById('chart-hoteles') as HTMLCanvasElement;
+    if (chartHoteles) chartHoteles.destroy();
+    chartHoteles = new Chart(ctx, {
+      type: 'line',
+      data: {
+        labels: [...data].reverse().map(r => new Date(r.fecha_reporte).toLocaleDateString()),
+        datasets: [{ label: 'Huéspedes', data: [...data].reverse().map(r => r.total_huespedes), borderColor: '#3b82f6', tension: 0.4, fill: true, backgroundColor: 'rgba(59, 130, 246, 0.1)' }]
+      },
+      options: { maintainAspectRatio: false, animation: false }
+    });
   }
 
-  function renderHoteles(data: any[]) {
-    const table = document.getElementById('table-hoteles');
-    let totalHuespedes = 0;
-    let totalHab = 0;
-    let totalOcu = 0;
-    let sumaEstadia = 0;
-
-    table!.innerHTML = data.map((r: any) => {
-      totalHuespedes += r.total_huespedes || 0;
-      totalHab += r.total_habitaciones || 0;
-      totalOcu += r.habitaciones_ocupadas || 0;
-      sumaEstadia += r.estadia_promedio || 0;
-
-      const porc = r.total_habitaciones > 0 ? ((r.habitaciones_ocupadas / r.total_habitaciones) * 100).toFixed(1) : "0.0";
-
-      return `
-        <tr class="border-t border-slate-50">
-          <td class="py-4 font-semibold">${r.entidades.departamento} <br><span class="text-xs font-normal text-slate-400">${r.entidades.nombre}</span></td>
-          <td class="py-4">${r.total_habitaciones || '-'}</td>
-          <td class="py-4">${r.habitaciones_ocupadas || '-'}</td>
-          <td class="py-4 text-right">
-            <span class="bg-blue-50 text-blue-700 px-3 py-1 rounded-full font-bold">${porc}%</span>
-          </td>
-        </tr>
-      `;
-    }).join('');
-
-    document.getElementById('stat-total-huespedes')!.textContent = totalHuespedes.toLocaleString();
-    document.getElementById('stat-avg-ocupacion')!.textContent = `${totalHab > 0 ? ((totalOcu / totalHab) * 100).toFixed(1) : 0}%`;
-    document.getElementById('stat-avg-estadia')!.textContent = `${(sumaEstadia / (data.length || 1)).toFixed(1)} nts`;
+  function renderChartMuseos(data: any[]) {
+    const ctx = document.getElementById('chart-museos') as HTMLCanvasElement;
+    if (chartMuseos) chartMuseos.destroy();
+    const t = data.reduce((acc, c) => ({ l: acc.l + (c.visitantes_locales || 0), n: acc.n + (c.visitantes_nacionales || 0) }), { l: 0, n: 0 });
+    chartMuseos = new Chart(ctx, {
+      type: 'doughnut',
+      data: { labels: ['Locales', 'Nacionales'], datasets: [{ data: [t.l, t.n], backgroundColor: ['#f97316', '#fbbf24'] }] },
+      options: { maintainAspectRatio: false, animation: false }
+    });
   }
 
-  function renderMuseos(data: any[]) {
-    const list = document.getElementById('list-museos');
-    let totalVis = 0;
+  // --- NUEVA FUNCIÓN PDF (SIN HTML2CANVAS) ---
+  function exportarPDFDirecto() {
+    const btn = document.getElementById('btn-pdf') as HTMLButtonElement;
+    btn.textContent = "Generando...";
+    btn.disabled = true;
 
-    list!.innerHTML = data.map((r: any) => {
-      totalVis += r.total_visitantes || 0;
-      return `
-        <div class="p-4 border border-slate-100 rounded-xl bg-slate-50">
-          <div class="text-sm text-slate-500">${r.entidades.nombre}</div>
-          <div class="text-xl font-bold text-slate-900">${r.total_visitantes} visitantes</div>
-          <div class="text-xs text-orange-600 mt-1 font-medium">${r.visitantes_internacionales || 0} extranjeros</div>
-        </div>
-      `;
-    }).join('');
+    try {
+      const doc = new jsPDF('p', 'mm', 'a4');
+      const pageWidth = doc.internal.pageSize.getWidth();
 
-    document.getElementById('stat-total-visitantes')!.textContent = totalVis.toLocaleString();
+      // Encabezado
+      doc.setFontSize(22);
+      doc.setTextColor(15, 23, 42);
+      doc.text("Informe Turístico", 14, 25);
+      
+      doc.setFontSize(10);
+      doc.setTextColor(100, 116, 139);
+      doc.text(`Fecha del reporte: ${new Date().toLocaleString()}`, 14, 33);
+      doc.line(14, 36, pageWidth - 14, 36);
+
+      // Capturar Chart 1 (Hoteles)
+      const canvasHoteles = document.getElementById('chart-hoteles') as HTMLCanvasElement;
+      const imgHoteles = canvasHoteles.toDataURL('image/png', 1.0);
+      doc.setFontSize(14);
+      doc.setTextColor(30, 41, 59);
+      doc.text("Tendencia de Ocupación Hotelera", 14, 48);
+      doc.addImage(imgHoteles, 'PNG', 14, 52, 180, 80);
+
+      // Capturar Chart 2 (Museos)
+      const canvasMuseos = document.getElementById('chart-museos') as HTMLCanvasElement;
+      const imgMuseos = canvasMuseos.toDataURL('image/png', 1.0);
+      doc.text("Origen de Visitantes (Museos)", 14, 145);
+      doc.addImage(imgMuseos, 'PNG', 45, 150, 120, 90);
+
+      doc.save(`Informe_Gobierno_${new Date().getTime()}.pdf`);
+    } catch (err) {
+      console.error(err);
+      alert("Error al crear el PDF");
+    } finally {
+      btn.textContent = "EXPORTAR INFORME PDF";
+      btn.disabled = false;
+    }
   }
 
-  // Ejecución inicial
-  checkAdminAccess();
-  fetchData();
+  // Lógica de carga (Hoteles/Museos) simplificada
+  async function cargarDatosHotel(id = null) {
+    let q = supabase.from('reportes_hoteleria').select('*, entidades(nombre)').order('fecha_reporte', { ascending: false });
+    if (id) q = q.eq('entidad_id', id);
+    const { data } = await q;
+    if (data) {
+      document.getElementById('tabla-hoteles')!.innerHTML = data.map(r => `<tr class="hover:bg-slate-50"><td class="px-6 py-4">${new Date(r.fecha_reporte).toLocaleDateString()}</td><td class="px-6 py-4">${r.entidades.nombre}</td><td class="px-6 py-4">${r.total_huespedes}</td><td class="px-6 py-4 text-right"><button onclick="confirmarEliminacion('${r.id}', 'reportes_hoteleria')" class="text-red-500">Borrar</button></td></tr>`).join('');
+      if (userProfile.rol === 'admin_gobierno') renderChartHoteles(data);
+    }
+  }
+
+  async function cargarDatosMuseo(id = null) {
+    let q = supabase.from('reportes_museos').select('*, entidades(nombre)').order('fecha_reporte', { ascending: false });
+    if (id) q = q.eq('entidad_id', id);
+    const { data } = await q;
+    if (data) {
+      document.getElementById('tabla-museos')!.innerHTML = data.map(r => `<tr class="hover:bg-slate-50"><td class="px-6 py-4">${new Date(r.fecha_reporte).toLocaleDateString()}</td><td class="px-6 py-4">${r.entidades.nombre}</td><td class="px-6 py-4">${r.total_visitantes}</td><td class="px-6 py-4 text-right"><button onclick="confirmarEliminacion('${r.id}', 'reportes_museos')" class="text-red-500">Borrar</button></td></tr>`).join('');
+      if (userProfile.rol === 'admin_gobierno') renderChartMuseos(data);
+    }
+  }
+
+  function cargarTodo() { cargarDatosHotel(); cargarDatosMuseo(); }
+  initDashboard();
 </script>
