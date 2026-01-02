@@ -1,5 +1,8 @@
 ---
 import Layout from '../../layouts/Layout.astro';
+import MapaEstadistico from '../../components/dashboard/MapaEstadistico.astro';
+import GraficosAdmin from '../../components/dashboard/GraficosAdmin.astro';
+import TablasReportes from '../../components/dashboard/TablasReportes.astro';
 ---
 
 <Layout title="Panel de Control">
@@ -12,443 +15,154 @@ import Layout from '../../layouts/Layout.astro';
       <div id="action-buttons" class="flex flex-wrap gap-3"></div>
     </div>
 
-    <div id="map-section" class="hidden grid grid-cols-1 lg:grid-cols-3 gap-8 mb-10">
-      <div class="lg:col-span-2 bg-white p-6 rounded-2xl shadow-xl border border-slate-200">
-        <div class="flex justify-between items-center mb-4">
-          <h3 class="text-sm font-bold text-slate-400 uppercase tracking-widest flex items-center gap-2">
-            <span class="w-3 h-3 bg-indigo-500 rounded-full"></span>
-            Mapa Geográfico de Impacto
-          </h3>
-          <button id="reset-map" class="text-[10px] bg-slate-100 px-2 py-1 rounded font-bold hover:bg-slate-200 transition-all">REINICIAR VISTA</button>
-        </div>
-        <div id="map-container" class="h-[400px] w-full bg-slate-100 rounded-xl relative overflow-hidden border border-slate-200"></div>
-      </div>
-      
-      <div class="bg-white p-6 rounded-2xl shadow-xl border border-slate-200 flex flex-col justify-center text-center">
-          <h4 class="text-slate-400 uppercase text-xs font-bold tracking-tighter mb-2">Departamento seleccionado</h4>
-          <p id="depto-name" class="text-2xl font-black text-slate-900 mb-6 italic">Selecciona uno en el mapa</p>
-          <div class="grid grid-cols-2 gap-4">
-            <div class="bg-blue-50 p-4 rounded-xl">
-              <span class="block text-blue-600 font-bold text-xl counter" id="depto-hoteles">0</span>
-              <span class="text-[10px] text-blue-400 font-bold uppercase">Huéspedes</span>
-            </div>
-            <div class="bg-orange-50 p-4 rounded-xl">
-              <span class="block text-orange-600 font-bold text-xl counter" id="depto-museos">0</span>
-              <span class="text-[10px] text-orange-400 font-bold uppercase">Visitantes</span>
-            </div>
-          </div>
-      </div>
-    </div>
+    <MapaEstadistico />
+    <GraficosAdmin />
+    <TablasReportes />
 
-    <div id="admin-charts" class="hidden grid grid-cols-1 md:grid-cols-2 gap-8 mb-10">
-      <div class="bg-white p-6 rounded-2xl shadow-xl border border-slate-200">
-        <h3 class="text-sm font-bold text-slate-400 uppercase tracking-widest mb-4 flex items-center gap-2">
-          <span class="w-3 h-3 bg-blue-500 rounded-full"></span> Tendencia de Huéspedes
-        </h3>
-        <div class="h-[300px] w-full">
-          <canvas id="chart-hoteles"></canvas>
-        </div>
-      </div>
-
-      <div class="bg-white p-6 rounded-2xl shadow-xl border border-slate-200">
-        <h3 class="text-sm font-bold text-slate-400 uppercase tracking-widest mb-4 flex items-center gap-2">
-          <span class="w-3 h-3 bg-orange-500 rounded-full"></span> Distribución de Visitantes
-        </h3>
-        <div class="h-[300px] w-full">
-          <canvas id="chart-museos"></canvas>
-        </div>
-      </div>
-
-      <div class="bg-white p-6 rounded-2xl shadow-xl border border-slate-200 col-span-1 md:col-span-2">
-        <div class="flex justify-between items-center mb-4">
-          <h3 class="text-sm font-bold text-slate-400 uppercase tracking-widest flex items-center gap-2">
-            <span class="w-3 h-3 bg-emerald-500 rounded-full"></span> Impacto Turístico Nacional vs Internacional
-          </h3>
-          <select id="filtro-mes" class="border rounded-lg px-3 py-1 text-sm bg-slate-50 outline-none focus:ring-2 focus:ring-emerald-500">
-            <option value="all">Todos los meses</option>
-            <option value="0">Enero</option><option value="1">Febrero</option>
-            <option value="2">Marzo</option><option value="3">Abril</option>
-            <option value="4">Mayo</option><option value="5">Junio</option>
-            <option value="6">Julio</option><option value="7">Agosto</option>
-            <option value="8">Septiembre</option><option value="9">Octubre</option>
-            <option value="10">Noviembre</option><option value="11">Diciembre</option>
-          </select>
-        </div>
-        <div class="h-[350px]">
-          <canvas id="chart-mixto-turismo"></canvas>
-        </div>
-      </div>
-    </div>
-
-    <div id="admin-filters" class="hidden mb-8 flex gap-4">
-        <button class="filter-btn active bg-slate-900 text-white px-4 py-2 rounded-lg text-sm font-bold" data-filter="todos">Todos</button>
-        <button class="filter-btn bg-white text-slate-600 px-4 py-2 rounded-lg text-sm font-bold border" data-filter="hotel">Hoteles</button>
-        <button class="filter-btn bg-white text-slate-600 px-4 py-2 rounded-lg text-sm font-bold border" data-filter="museo">Museos</button>
-    </div>
-
-    <div class="grid grid-cols-1 gap-8">
-      <section id="container-hoteles" class="bg-white shadow-xl rounded-2xl overflow-hidden border border-slate-200">
-        <div class="p-6 border-b border-slate-100 bg-blue-50/50"><h2 class="font-bold text-blue-900">Reportes de Hotelería</h2></div>
-        <div class="overflow-x-auto">
-          <table class="w-full text-left text-sm">
-            <thead class="bg-slate-50 text-slate-500 uppercase text-[10px]">
-              <tr>
-                <th class="px-4 py-4">Fecha</th><th class="px-4 py-4">Entidad</th>
-                <th class="px-4 py-4">Huéspedes</th><th class="px-4 py-4">Hab. Ocupadas</th>
-                <th class="px-4 py-4">Nacionales</th><th class="px-4 py-4">Internacionales</th>
-                <th class="px-4 py-4 text-right">Acciones</th>
-              </tr>
-            </thead>
-            <tbody id="tabla-hoteles" class="divide-y divide-slate-100"></tbody>
-          </table>
-        </div>
-      </section>
-
-      <section id="container-museos" class="bg-white shadow-xl rounded-2xl overflow-hidden border border-slate-200">
-        <div class="p-6 border-b border-slate-100 bg-orange-50/50"><h2 class="font-bold text-orange-900">Reportes de Museos</h2></div>
-        <div class="overflow-x-auto">
-          <table class="w-full text-left text-sm">
-            <thead class="bg-slate-50 text-slate-500 uppercase text-[10px]">
-              <tr>
-                <th class="px-4 py-4">Fecha</th><th class="px-4 py-4">Entidad</th>
-                <th class="px-4 py-4">Locales</th><th class="px-4 py-4">Nacionales</th>
-                <th class="px-4 py-4">Internacionales</th><th class="px-4 py-4">Total</th>
-                <th class="px-4 py-4 text-right">Acciones</th>
-              </tr>
-            </thead>
-            <tbody id="tabla-museos" class="divide-y divide-slate-100"></tbody>
-          </table>
-        </div>
-      </section>
-    </div>
   </main>
 </Layout>
 
 <script>
-  import { supabase } from '../../lib/supabase';
-  import Chart from 'chart.js/auto';
-  import { jsPDF } from 'jspdf';
-  import autoTable from 'jspdf-autotable';
-  import * as d3 from 'd3';
+  import * as api from '../../lib/dashboard/dataService';
+  import * as charts from '../../lib/dashboard/chartLogic';
+  import * as map from '../../lib/dashboard/mapLogic';
+  import { exportarPDF } from '../../lib/dashboard/pdfService';
 
-  let userProfile: any = null;
-  let chartHoteles: any, chartMuseos: any, chartMixto: any;
-  let currentDataHoteles: any[] = [];
-  let currentDataMuseos: any[] = [];
-  let svg: any, g: any, zoom: any;
+  // Variables de estado local para manejar los datos en esta página
+  let dataH: any[] = [];
+  let dataM: any[] = [];
 
-  const clean = (val: any) => val ?? 0;
-  const normalizar = (str: string) => str ? str.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").trim() : "";
-
-  async function initDashboard() {
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) { window.location.href = '/'; return; }
-    const { data: perfil } = await supabase.from('perfiles').select('*, entidades(*)').eq('id', user.id).single();
-    userProfile = perfil;
-    const actions = document.getElementById('action-buttons');
-
-    if (perfil.rol === 'admin_gobierno') {
-      document.getElementById('welcome-title')!.textContent = "Panel de Gobierno";
-      document.getElementById('admin-filters')?.classList.remove('hidden');
-      document.getElementById('admin-charts')?.classList.remove('hidden');
-      document.getElementById('map-section')?.classList.remove('hidden');
-      if (actions) {
-        actions.innerHTML = `
-          <a href="/dashboard/gestion" class="bg-white text-slate-700 border border-slate-200 px-5 py-2.5 rounded-xl font-bold shadow-sm hover:bg-slate-50 transition-all text-sm">GESTIONAR ENTIDADES</a>
-          <button id="btn-pdf" class="bg-slate-900 text-white px-5 py-2.5 rounded-xl font-bold shadow-lg hover:bg-black transition-all text-sm">DESCARGAR PDF</button>
-        `;
-        document.getElementById('btn-pdf')?.addEventListener('click', exportarPDFPro);
-      }
-      await cargarTodo();
-      initMap();
-    } else {
-      document.getElementById('welcome-title')!.textContent = perfil.entidades.nombre;
-      if (actions) actions.innerHTML = `<a href="/dashboard/reportar" class="bg-blue-600 text-white px-6 py-3 rounded-xl font-bold"> + NUEVO REPORTE</a>`;
-      perfil.entidades.tipo === 'hotel' ? cargarDatosHotel(perfil.entidad_id) : cargarDatosMuseo(perfil.entidad_id);
-    }
-  }
-
-  // --- LÓGICA DEL MAPA ---
-  function getDeptoWeight(nombre: string) {
-    const norm = normalizar(nombre);
-    const h = currentDataHoteles.filter(r => r.entidades && normalizar(r.entidades.departamento) === norm).reduce((acc, r) => acc + clean(r.total_huespedes), 0);
-    const m = currentDataMuseos.filter(r => r.entidades && normalizar(r.entidades.departamento) === norm).reduce((acc, r) => acc + clean(r.total_visitantes), 0);
-    return h + m;
-  }
-
-  async function initMap() {
-    const container = document.getElementById('map-container');
-    if (!container) return;
-    const width = container.clientWidth, height = 400;
-    const sanjuan: any = await d3.json("/maps/sanjuan.json");
-    const maxVal = Math.max(...sanjuan.features.map((f: any) => getDeptoWeight(f.properties.departamento)), 10);
-    const colorScale = d3.scaleSequential(d3.interpolateGreens).domain([0, maxVal]);
-
-    svg = d3.select("#map-container").append("svg").attr("width", "100%").attr("height", height).attr("viewBox", `0 0 ${width} ${height}`);
-    g = svg.append("g");
-    const projection = d3.geoMercator().fitSize([width, height], sanjuan);
-    const path = d3.geoPath().projection(projection);
-
-    g.selectAll("path").data(sanjuan.features).join("path").attr("d", path)
-      .attr("fill", (d: any) => { const w = getDeptoWeight(d.properties.departamento); return w > 0 ? colorScale(w) : "#ffffff"; })
-      .attr("class", "stroke-slate-300 cursor-pointer transition-colors")
-      .attr("stroke-width", "1.5")
-      .on("click", (event: any, d: any) => {
-        const [[x0, y0], [x1, y1]] = path.bounds(d);
-        event.stopPropagation();
-        svg.transition().duration(750).call(zoom.transform, d3.zoomIdentity.translate(width/2, height/2).scale(Math.min(8, 0.9 / Math.max((x1-x0)/width, (y1-y0)/height))).translate(-(x0+x1)/2, -(y0+y1)/2));
-        actualizarInfoDepto(d.properties.departamento);
-      });
-
-    zoom = d3.zoom().scaleExtent([1, 8]).on("zoom", (e) => g.attr("transform", e.transform));
-    svg.call(zoom);
-    document.getElementById('reset-map')?.addEventListener('click', () => {
-      svg.transition().duration(750).call(zoom.transform, d3.zoomIdentity);
-      actualizarInfoDepto(null);
-    });
-  }
-
-  function actualizarInfoDepto(nombre: string | null) {
-    const nameEl = document.getElementById('depto-name');
-    if (!nombre) {
-        if (nameEl) nameEl.textContent = "Selecciona uno";
-        document.getElementById('depto-hoteles')!.textContent = "0";
-        document.getElementById('depto-museos')!.textContent = "0";
-        return;
-    }
-    nameEl!.textContent = nombre;
-    const norm = normalizar(nombre);
-    const h = currentDataHoteles.filter(r => normalizar(r.entidades.departamento) === norm).reduce((a, b) => a + clean(b.total_huespedes), 0);
-    const m = currentDataMuseos.filter(r => normalizar(r.entidades.departamento) === norm).reduce((a, b) => a + clean(b.total_visitantes), 0);
-    document.getElementById('depto-hoteles')!.textContent = h.toLocaleString();
-    document.getElementById('depto-museos')!.textContent = m.toLocaleString();
-  }
-
-  // --- CARGA DE DATOS Y GRÁFICOS ---
-  async function cargarDatosHotel(id = null) {
-    let q = supabase.from('reportes_hoteleria').select('*, entidades(*)').order('fecha_reporte', { ascending: false });
-    if (id) q = q.eq('entidad_id', id);
-    const { data } = await q;
-    if (data) {
-      currentDataHoteles = data;
-      document.getElementById('tabla-hoteles')!.innerHTML = data.map(r => `
-        <tr class="hover:bg-slate-50">
-          <td class="px-4 py-4 text-xs">${new Date(r.fecha_reporte).toLocaleDateString()}</td>
-          <td class="px-4 py-4 font-medium">${r.entidades.nombre}</td>
-          <td class="px-4 py-4 font-bold text-blue-600">${clean(r.total_huespedes)}</td>
-          <td class="px-4 py-4">${clean(r.habitaciones_ocupadas)}</td>
-          <td class="px-4 py-4">${clean(r.origen_nacional)}</td>
-          <td class="px-4 py-4">${clean(r.origen_internacional)}</td>
-          <td class="px-4 py-4 text-right"><button onclick="confirmarEliminacion('${r.id}', 'reportes_hoteleria')" class="text-red-500 font-bold hover:underline text-xs">Borrar</button></td>
-        </tr>`).join('');
-      if (userProfile.rol === 'admin_gobierno') renderChartHoteles(data);
-    }
-  }
-
-  async function cargarDatosMuseo(id = null) {
-    let q = supabase.from('reportes_museos').select('*, entidades(*)').order('fecha_reporte', { ascending: false });
-    if (id) q = q.eq('entidad_id', id);
-    const { data } = await q;
-    if (data) {
-      currentDataMuseos = data;
-      document.getElementById('tabla-museos')!.innerHTML = data.map(r => `
-        <tr class="hover:bg-slate-50">
-          <td class="px-4 py-4 text-xs">${new Date(r.fecha_reporte).toLocaleDateString()}</td>
-          <td class="px-4 py-4 font-medium">${r.entidades.nombre}</td>
-          <td class="px-4 py-4">${clean(r.visitantes_locales)}</td>
-          <td class="px-4 py-4">${clean(r.visitantes_nacionales)}</td>
-          <td class="px-4 py-4">${clean(r.visitantes_internacionales)}</td>
-          <td class="px-4 py-4 font-bold text-orange-600">${clean(r.total_visitantes)}</td>
-          <td class="px-4 py-4 text-right"><button onclick="confirmarEliminacion('${r.id}', 'reportes_museos')" class="text-red-500 font-bold hover:underline text-xs">Borrar</button></td>
-        </tr>`).join('');
-      if (userProfile.rol === 'admin_gobierno') renderChartMuseos(data);
-    }
-  }
-
-  function renderChartHoteles(data: any[]) {
-    const ctx = document.getElementById('chart-hoteles') as HTMLCanvasElement;
-    if (chartHoteles) chartHoteles.destroy();
-    chartHoteles = new Chart(ctx, {
-      type: 'line',
-      data: {
-        labels: [...data].reverse().map(r => new Date(r.fecha_reporte).toLocaleDateString()),
-        datasets: [{ label: 'Huéspedes', data: [...data].reverse().map(r => clean(r.total_huespedes)), borderColor: '#3b82f6', tension: 0.4, fill: true, backgroundColor: 'rgba(59, 130, 246, 0.1)' }]
-      },
-      options: { maintainAspectRatio: false, animation: false, responsive: true, devicePixelRatio: 4, }
-    });
-  }
-
-  function renderChartMuseos(data: any[]) {
-    const ctx = document.getElementById('chart-museos') as HTMLCanvasElement;
-    if (chartMuseos) chartMuseos.destroy();
-    const t = data.reduce((acc, c) => ({ l: acc.l + clean(c.visitantes_locales), n: acc.n + clean(c.visitantes_nacionales), e: acc.e + clean(c.visitantes_internacionales) }), { l: 0, n: 0, e: 0 });
-    chartMuseos = new Chart(ctx, {
-      type: 'doughnut',
-      data: { labels: ['Locales', 'Nacionales', 'Internacionales'], datasets: [{ data: [t.l, t.n, t.e], backgroundColor: ['#f97316', '#fbbf24', '#10b981'] }] },
-      options: { maintainAspectRatio: false, animation: false, responsive: true, devicePixelRatio: 4,  }
-    });
-  }
-
-  function renderChartIntegrado(mes: string = 'all') {
-    const ctx = document.getElementById('chart-mixto-turismo') as HTMLCanvasElement;
-    if (!ctx || chartMixto) chartMixto?.destroy();
-    const filtrar = (data: any[]) => mes === 'all' ? data : data.filter(r => new Date(r.fecha_reporte).getMonth().toString() === mes);
-    const h = filtrar(currentDataHoteles), m = filtrar(currentDataMuseos);
-    chartMixto = new Chart(ctx, {
-      type: 'bar',
-      data: {
-        labels: ['Hotelería', 'Museos'],
-        datasets: [
-          { label: 'Nacionales', data: [h.reduce((a,b)=>a+clean(b.origen_nacional),0), m.reduce((a,b)=>a+clean(b.visitantes_nacionales),0)], backgroundColor: '#3b82f6' },
-          { label: 'Internacionales', data: [h.reduce((a,b)=>a+clean(b.origen_internacional),0), m.reduce((a,b)=>a+clean(b.visitantes_internacionales),0)], backgroundColor: '#10b981' }
-        ]
-      },
-      options: { maintainAspectRatio: false, scales: { y: { stacked: true }, x: { stacked: true } }, animation: false, responsive: true, devicePixelRatio: 4, }
-    });
-  }
-
-  async function exportarPDFPro() {
-    const btn = document.getElementById('btn-pdf') as HTMLButtonElement;
-    const originalText = btn.textContent;
-    btn.textContent = "Procesando...";
-    btn.disabled = true;
-
+  async function init() {
     try {
-      const doc = new jsPDF('p', 'mm', 'a4');
-      const dateStr = new Date().toLocaleDateString();
+      const perfil = await api.getProfile();
       
-      // --- PÁGINA 1: PORTADA Y GRÁFICOS PRINCIPALES ---
-      doc.setFillColor(30, 41, 59); // Slate-800
-      doc.rect(0, 0, 210, 40, 'F');
-      doc.setTextColor(255, 255, 255);
-      doc.setFontSize(22);
-      doc.text("INFORME ESTADÍSTICO TURÍSTICO", 14, 25);
-      doc.setFontSize(10);
-      doc.text(`Generado el: ${dateStr} | Sistema de Gestión de Gobierno`, 14, 33);
-
-      // --- 1. Gráfico de Tendencia de Hoteles (Líneas) ---
-      doc.setTextColor(30, 41, 59);
-      doc.setFontSize(14);
-      doc.text("1. Evolución de Huéspedes (Hotelería)", 14, 50);
-      
-      const canvasHoteles = document.getElementById('chart-hoteles') as HTMLCanvasElement;
-      if (canvasHoteles) {
-        const imgHoteles = canvasHoteles.toDataURL('image/png', 1.0);
-        doc.addImage(imgHoteles, 'PNG', 15, 55, 180, 70);
+      if (!perfil) {
+        window.location.href = '/';
+        return;
       }
 
-      // --- 2. Gráfico de Impacto Mixto (Barras) ---
-      doc.setFontSize(14);
-      doc.text("2. Comparativa de Origen: Nacional vs Internacional", 14, 135);
-      
-      const canvasMixto = document.getElementById('chart-mixto-turismo') as HTMLCanvasElement;
-      if (canvasMixto) {
-        const imgMixto = canvasMixto.toDataURL('image/png', 1.0);
-        doc.addImage(imgMixto, 'PNG', 15, 140, 180, 75);
+      const actions = document.getElementById('action-buttons');
+
+      if (perfil.rol === 'admin_gobierno') {
+        // 1. Configurar UI de Admin
+        document.getElementById('welcome-title')!.textContent = "Panel de Gobierno";
+        document.getElementById('admin-filters')?.classList.remove('hidden');
+        document.getElementById('admin-charts')?.classList.remove('hidden');
+        document.getElementById('map-section')?.classList.remove('hidden');
+        
+        if (actions) {
+          actions.innerHTML = `
+            <a href="/dashboard/gestion" class="bg-white text-slate-700 border border-slate-200 px-5 py-2.5 rounded-xl font-bold shadow-sm hover:bg-slate-50 transition-all text-sm">GESTIONAR ENTIDADES</a>
+            <button id="btn-pdf" class="bg-slate-900 text-white px-5 py-2.5 rounded-xl font-bold shadow-lg hover:bg-black transition-all text-sm">DESCARGAR PDF</button>
+          `;
+        }
+
+        // 2. Cargar Datos desde el servicio
+        dataH = await api.fetchHoteles();
+        dataM = await api.fetchMuseos();
+        
+        // 3. Renderizar Visualizaciones (Mapa y Gráficos)
+        await map.initMap(dataH, dataM);
+        charts.renderChartHoteles(dataH);
+        charts.renderChartMuseos(dataM);
+        charts.renderChartIntegrado(dataH, dataM);
+
+        // 4. Renderizar Tablas
+        actualizarTablas(dataH, dataM);
+        
+        // 5. Configurar Eventos
+        setupEventListeners();
+
+      } else {
+        // Lógica para usuarios de entidades (Hoteles/Museos)
+        document.getElementById('welcome-title')!.textContent = perfil.entidades.nombre;
+        if (actions) {
+          actions.innerHTML = `<a href="/dashboard/reportar" class="bg-blue-600 text-white px-6 py-3 rounded-xl font-bold"> + NUEVO REPORTE</a>`;
+        }
+
+        if (perfil.entidades.tipo === 'hotel') {
+          dataH = await api.fetchHoteles(perfil.entidad_id);
+          actualizarTablas(dataH, []);
+        } else {
+          dataM = await api.fetchMuseos(perfil.entidad_id);
+          actualizarTablas([], dataM);
+        }
       }
-
-      // --- 3. Gráfico de Museos (Doughnut) ---
-      doc.setFontSize(14);
-      doc.text("3. Composición de Visitantes en Museos", 14, 225);
-      
-      const canvasMuseos = document.getElementById('chart-museos') as HTMLCanvasElement;
-      if (canvasMuseos) {
-        const imgMuseos = canvasMuseos.toDataURL('image/png', 1.0);
-        // Lo dibujamos más pequeño y centrado al final de la página
-        doc.addImage(imgMuseos, 'PNG', 75, 230, 60, 50);
-      }
-
-      // --- PÁGINA 2: TABLA DETALLADA DE HOTELERÍA ---
-      doc.addPage();
-      doc.setFontSize(14);
-      doc.text("4. Detalle de Registros: Hotelería", 14, 20);
-      
-      const dataH = currentDataHoteles.map(r => [
-        new Date(r.fecha_reporte).toLocaleDateString(),
-        r.entidades?.nombre || 'N/A',
-        clean(r.total_huespedes),
-        clean(r.origen_nacional),
-        clean(r.origen_internacional),
-        clean(r.habitaciones_ocupadas)
-      ]);
-
-      autoTable(doc, {
-        startY: 25,
-        head: [['Fecha', 'Establecimiento', 'Huésp.', 'Nac.', 'Int.', 'Hab. Oc.']],
-        body: dataH,
-        headStyles: { fillColor: [59, 130, 246] },
-        styles: { fontSize: 8 },
-        margin: { top: 25 }
-      });
-
-      // --- PÁGINA 3: TABLA DETALLADA DE MUSEOS ---
-      doc.addPage();
-      doc.setFontSize(14);
-      doc.text("5. Detalle de Registros: Museos y Cultura", 14, 20);
-
-      const dataM = currentDataMuseos.map(r => [
-        new Date(r.fecha_reporte).toLocaleDateString(),
-        r.entidades?.nombre || 'N/A',
-        clean(r.visitantes_locales),
-        clean(r.visitantes_nacionales),
-        clean(r.visitantes_internacionales),
-        clean(r.total_visitantes)
-      ]);
-
-      autoTable(doc, {
-        startY: 25,
-        head: [['Fecha', 'Institución', 'Loc.', 'Nac.', 'Int.', 'Total']],
-        body: dataM,
-        headStyles: { fillColor: [249, 115, 22] },
-        styles: { fontSize: 8 },
-        margin: { top: 25 }
-      });
-
-      // --- Pie de página y numeración ---
-      const pages = (doc as any).internal.getNumberOfPages();
-      for (let i = 1; i <= pages; i++) {
-        doc.setPage(i);
-        doc.setFontSize(8);
-        doc.setTextColor(150);
-        doc.text(`Documento Oficial - Página ${i} de ${pages}`, 105, 290, { align: 'center' });
-      }
-
-      doc.save(`Informe_Turistico_Completo_${dateStr.replace(/\//g, '-')}.pdf`);
-    } catch (e) {
-      console.error("Error PDF:", e);
-      alert("Error al capturar los gráficos. Asegúrate de que todos los gráficos sean visibles en la pantalla.");
-    } finally {
-      btn.textContent = originalText;
-      btn.disabled = false;
+    } catch (error) {
+      console.error("Error al inicializar el Dashboard:", error);
     }
   }
 
-  async function cargarTodo() { 
-    await Promise.all([cargarDatosHotel(), cargarDatosMuseo()]); 
-    renderChartIntegrado();
-  }
+  // Función para llenar las tablas HTML
+  function actualizarTablas(hoteles: any[], museos: any[]) {
+    const tablaHoteles = document.getElementById('tabla-hoteles');
+    const tablaMuseos = document.getElementById('tabla-museos');
 
-  // --- EVENTOS ---
-  document.getElementById('filtro-mes')?.addEventListener('change', (e) => renderChartIntegrado((e.target as HTMLSelectElement).value));
+    if (tablaHoteles) {
+      tablaHoteles.innerHTML = hoteles.map(r => `
+        <tr class="hover:bg-slate-50 border-b border-slate-100">
+          <td class="px-4 py-4 text-xs text-slate-500">${new Date(r.fecha_reporte).toLocaleDateString()}</td>
+          <td class="px-4 py-4 font-medium text-slate-700">${r.entidades?.nombre || 'N/A'}</td>
+          <td class="px-4 py-4 font-bold text-blue-600">${r.total_huespedes || 0}</td>
+          <td class="px-4 py-4 text-slate-600">${r.habitaciones_ocupadas || 0}</td>
+          <td class="px-4 py-4 text-slate-600">${r.origen_nacional || 0}</td>
+          <td class="px-4 py-4 text-slate-600">${r.origen_internacional || 0}</td>
+          <td class="px-4 py-4 text-right">
+            <button data-id="${r.id}" data-type="reportes_hoteleria" class="delete-btn text-red-500 hover:text-red-700 font-bold text-xs">Borrar</button>
+          </td>
+        </tr>`).join('');
+    }
 
-  document.querySelectorAll('.filter-btn').forEach(btn => {
-    btn.addEventListener('click', () => {
-      document.querySelectorAll('.filter-btn').forEach(b => b.classList.replace('bg-slate-900', 'bg-white'));
-      btn.classList.replace('bg-white', 'bg-slate-900');
-      const f = btn.getAttribute('data-filter');
-      document.getElementById('container-hoteles')?.classList.toggle('hidden', f === 'museo');
-      document.getElementById('container-museos')?.classList.toggle('hidden', f === 'hotel');
+    if (tablaMuseos) {
+      tablaMuseos.innerHTML = museos.map(r => `
+        <tr class="hover:bg-slate-50 border-b border-slate-100">
+          <td class="px-4 py-4 text-xs text-slate-500">${new Date(r.fecha_reporte).toLocaleDateString()}</td>
+          <td class="px-4 py-4 font-medium text-slate-700">${r.entidades?.nombre || 'N/A'}</td>
+          <td class="px-4 py-4 text-slate-600">${r.visitantes_locales || 0}</td>
+          <td class="px-4 py-4 text-slate-600">${r.visitantes_nacionales || 0}</td>
+          <td class="px-4 py-4 text-slate-600">${r.visitantes_internacionales || 0}</td>
+          <td class="px-4 py-4 font-bold text-orange-600">${r.total_visitantes || 0}</td>
+          <td class="px-4 py-4 text-right">
+            <button data-id="${r.id}" data-type="reportes_museos" class="delete-btn text-red-500 hover:text-red-700 font-bold text-xs">Borrar</button>
+          </td>
+        </tr>`).join('');
+    }
+
+    // Listener para botones de borrado (Delegación de eventos)
+    document.querySelectorAll('.delete-btn').forEach(btn => {
+      btn.addEventListener('click', async (e) => {
+        const target = e.target as HTMLElement;
+        const id = target.dataset.id;
+        const type = target.dataset.type;
+        if (id && type && confirm("¿Estás seguro de que deseas eliminar este registro?")) {
+          await api.eliminarRegistro(id, type);
+          init(); // Recargar datos y refrescar UI
+        }
+      });
     });
-  });
+  }
 
-  (window as any).confirmarEliminacion = async (id: string, tabla: string) => {
-    if (confirm("¿Eliminar registro?")) {
-      await supabase.from(tabla).delete().eq('id', id);
-      await cargarTodo();
-      d3.select("#map-container svg").remove();
-      initMap();
-    }
-  };
+  function setupEventListeners() {
+    // PDF
+    document.getElementById('btn-pdf')?.addEventListener('click', () => exportarPDF(dataH, dataM));
+    
+    // Filtro por mes
+    document.getElementById('filtro-mes')?.addEventListener('change', (e) => {
+      const mes = (e.target as HTMLSelectElement).value;
+      charts.renderChartIntegrado(dataH, dataM, mes);
+    });
 
-  initDashboard();
+    // Filtros de vista (Hoteles/Museos)
+    document.querySelectorAll('.filter-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('.filter-btn').forEach(b => b.classList.replace('bg-slate-900', 'bg-white'));
+        btn.classList.replace('bg-white', 'bg-slate-900');
+        const filter = btn.getAttribute('data-filter');
+        document.getElementById('container-hoteles')?.classList.toggle('hidden', filter === 'museo');
+        document.getElementById('container-museos')?.classList.toggle('hidden', filter === 'hotel');
+      });
+    });
+  }
+
+  init();
 </script>
