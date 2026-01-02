@@ -1,26 +1,29 @@
-<div id="map-section" class="hidden grid grid-cols-1 lg:grid-cols-3 gap-8 mb-10">
-  <div class="lg:col-span-2 bg-white p-6 rounded-2xl shadow-xl border border-slate-200">
-    <div class="flex justify-between items-center mb-4">
-      <h3 class="text-sm font-bold text-slate-400 uppercase tracking-widest flex items-center gap-2">
-        <span class="w-3 h-3 bg-indigo-500 rounded-full"></span>
-        Mapa Geográfico de Impacto
-      </h3>
-      <button id="reset-map" class="text-[10px] bg-slate-100 px-2 py-1 rounded font-bold hover:bg-slate-200 transition-all">REINICIAR VISTA</button>
-    </div>
-    <div id="map-container" class="h-[400px] w-full bg-slate-100 rounded-xl relative overflow-hidden border border-slate-200"></div>
+<div id="map-section" class="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 hidden mb-8 relative">
+  <div class="flex justify-between items-center mb-6">
+    <h2 class="text-sm font-bold text-slate-400 uppercase tracking-widest mb-4 flex items-center gap-2">
+      <span class="w-3 h-3 bg-green-500 rounded-full"></span> Distribución Turistica Geográfica
+    </h2>
+    <button id="reset-map" class="text-xs font-bold text-blue-600 hover:underline">Reiniciar Vista</button>
   </div>
-  
-  <div class="bg-white p-6 rounded-2xl shadow-xl border border-slate-200 flex flex-col justify-center text-center">
-    <h4 class="text-slate-400 uppercase text-xs font-bold tracking-tighter mb-2">Departamento seleccionado</h4>
-    <p id="depto-name" class="text-2xl font-black text-slate-900 mb-6 italic">Selecciona uno en el mapa</p>
-    <div class="grid grid-cols-2 gap-4">
-      <div class="bg-blue-50 p-4 rounded-xl">
-        <span class="block text-blue-600 font-bold text-xl counter" id="depto-hoteles">0</span>
-        <span class="text-[10px] text-blue-400 font-bold uppercase">Huéspedes</span>
+
+  <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+    <div id="map-container" class="lg:col-span-2 bg-slate-50 rounded-xl relative overflow-hidden h-100">
+      <div id="map-tooltip" class="absolute hidden bg-slate-900 text-white px-3 py-1.5 rounded-lg text-xs font-bold pointer-events-none z-50 shadow-xl border border-white/20">
       </div>
-      <div class="bg-orange-50 p-4 rounded-xl">
-        <span class="block text-orange-600 font-bold text-xl counter" id="depto-museos">0</span>
-        <span class="text-[10px] text-orange-400 font-bold uppercase">Visitantes</span>
+    </div>
+
+    <div class="bg-slate-50 p-6 rounded-xl border border-slate-100 h-fit">
+      <span class="text-bold text-slate-500">Seleccione un Departamento</span>
+      <h3 id="depto-name" class="text-lg font-bold text-slate-900 mb-4">Selecciona Un Departamento</h3>
+      <div class="space-y-4">
+        <div class="flex justify-between items-center">
+          <span class="text-slate-500 text-sm">Huéspedes:</span>
+          <span id="depto-hoteles" class="font-bold text-blue-600 text-xl">0</span>
+        </div>
+        <div class="flex justify-between items-center">
+          <span class="text-slate-500 text-sm">Visitantes:</span>
+          <span id="depto-museos" class="font-bold text-orange-600 text-xl">0</span>
+        </div>
       </div>
     </div>
   </div>
