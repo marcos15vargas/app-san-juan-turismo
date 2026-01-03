@@ -2,10 +2,16 @@ import type { APIRoute } from 'astro';
 import { createClient } from '@supabase/supabase-js';
 
 export const POST: APIRoute = async ({ request }) => {
-  const SUPABASE_URL = process.env.PUBLIC_SUPABASE_URL || import.meta.env.PUBLIC_SUPABASE_URL;
-  const SERVICE_ROLE = process.env.SUPABASE_SERVICE_ROLE_KEY || import.meta.env.SUPABASE_SERVICE_ROLE_KEY;
+  const PUBLIC_URL = import.meta.env.PUBLIC_SUPABASE_URL;
+  const SERVICE_KEY = import.meta.env.SUPABASE_SERVICE_ROLE_KEY;
 
-  const supabaseAdmin = createClient(SUPABASE_URL, SERVICE_ROLE);
+  if (!PUBLIC_URL || !SERVICE_KEY) {
+    return new Response(JSON.stringify({ 
+        error: "Faltan variables de entorno en el servidor" 
+    }), { status: 500 });
+  }
+
+  const supabaseAdmin = createClient(PUBLIC_URL, SERVICE_KEY);
 
   const data = await request.json();
   const passwordAleatoria = Math.random().toString(36).slice(-10) + "SJ!"; // Genera algo como "a7b8c9d0SJ!"
