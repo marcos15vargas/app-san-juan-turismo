@@ -4,6 +4,11 @@ import { clean } from './dataService';
 let chartHoteles: any, chartMuseos: any, chartMixto: any;
 
 export function renderChartHoteles(data: any[]) {
+    const container = document.getElementById('admin-charts');
+    if (!container) return;
+
+    container.classList.remove('hidden');
+
     const ctx = document.getElementById('chart-hoteles') as HTMLCanvasElement;
     if (!ctx) return;
     if (chartHoteles) chartHoteles.destroy();
@@ -18,6 +23,10 @@ export function renderChartHoteles(data: any[]) {
 }
 
 export function renderChartMuseos(data: any[]) {
+    
+    const container = document.getElementById('admin-charts');
+    if (container) container.classList.remove('hidden');
+
     const ctx = document.getElementById('chart-museos') as HTMLCanvasElement;
     if (!ctx) return;
     if (chartMuseos) chartMuseos.destroy();

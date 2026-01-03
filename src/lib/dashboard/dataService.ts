@@ -44,6 +44,19 @@ export async function fetchMuseos(id = null) {
     return data || [];
 }
 
+export async function fetchDatosPublicos(tabla: string) {
+  const { data, error } = await supabase
+    .from(tabla)
+    .select(`
+      *,
+      entidades(nombre, departamento) 
+    `) // Traemos solo lo necesario para el mapa y gráficos
+    .eq('es_publico', true);
+
+  if (error) return [];
+  return data || [];
+}
+
 export async function eliminarRegistro(id: string, tabla: string) {
     return await supabase.from(tabla).delete().eq('id', id);
 }

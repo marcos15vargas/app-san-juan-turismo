@@ -94,6 +94,18 @@ import Layout from '../../layouts/Layout.astro';
           </div>
         </div>
 
+        <div class="flex items-center gap-4 p-5 bg-slate-50 rounded-2xl border border-slate-200">
+          <label class="relative inline-flex items-center cursor-pointer">
+            <input type="checkbox" id="field-es-publico" name="es_publico" class="sr-only peer">
+            <div class="w-11 h-6 bg-slate-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
+          </label>
+          
+          <div>
+            <span class="text-sm font-bold text-slate-800 block">Publicar en el Portal Abierto</span>
+            <p class="text-xs text-slate-500">Si lo activas, estos datos serán visibles para el público general.</p>
+          </div>
+        </div>
+
         <button type="submit" class="w-full bg-slate-900 text-white py-5 rounded-2xl font-bold shadow-lg hover:bg-black transition-all flex items-center justify-center gap-3">
           ENVIAR REPORTE OFICIAL
         </button>
@@ -148,7 +160,6 @@ import Layout from '../../layouts/Layout.astro';
     e.preventDefault();
     const formData = new FormData(form);
     
-    // VALIDACIÓN MANUAL SEGÚN TIPO PARA EVITAR CAMPOS VACÍOS
     const tipo = userProfile.entidades.tipo;
     if (tipo === 'hotel') {
       const habOcupadas = formData.get('habitaciones_ocupadas');
@@ -167,12 +178,16 @@ import Layout from '../../layouts/Layout.astro';
     const payload: any = {
       entidad_id: userProfile.entidad_id,
       creado_por: userProfile.id,
-      fecha_reporte: new Date().toISOString().split('T')[0]
+      fecha_reporte: new Date().toISOString().split('T')[0],
+      // CAMBIO: Capturamos el valor del checkbox de privacidad
+      es_publico: (document.getElementById('field-es-publico') as HTMLInputElement).checked
     };
 
-    // Solo procesar campos que pertenecen a la sección visible
     const sectionId = tipo === 'hotel' ? 'section-hotel' : 'section-museo';
     formData.forEach((value, key) => {
+      // Evitamos procesar 'es_publico' aquí ya que lo procesamos arriba manualmente
+      if (key === 'es_publico') return;
+
       const inputInActiveSection = document.querySelector(`#${sectionId} [name="${key}"]`);
       if (inputInActiveSection && value !== "") {
         payload[key] = key === 'estadia_promedio' ? parseFloat(value.toString()) : parseInt(value.toString());
@@ -188,11 +203,9 @@ import Layout from '../../layouts/Layout.astro';
     } else {
       alert("✅ Reporte guardado exitosamente.");
       
-      // Guardar el valor fijo de capacidad antes de resetear
       const habs = (document.getElementById('field-total-habitaciones') as HTMLInputElement)?.value;
       form.reset();
       
-      // Restaurar el valor fijo de capacidad_maxima después del reset
       if (habs) {
         (document.getElementById('field-total-habitaciones') as HTMLInputElement).value = habs;
       }

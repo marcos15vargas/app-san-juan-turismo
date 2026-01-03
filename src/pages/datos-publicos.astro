@@ -1,0 +1,75 @@
+---
+import Layout from '../layouts/Layout.astro';
+import MapaEstadistico from '../components/dashboard/MapaEstadistico.astro';
+import GraficosAdmin from '../components/dashboard/GraficosAdmin.astro';
+---
+
+<Layout title="Estadísticas Públicas">
+  <main class="max-w-6xl mx-auto py-10 px-4">
+    
+    <div class="text-center mb-12">
+      <h1 class="text-4xl font-extrabold text-slate-900 tracking-tight">Portal de Estadísticas Abiertas</h1>
+      <p class="text-lg text-slate-600 mt-2">Información turística oficial basada en reportes públicos.</p>
+    </div>
+
+    <div id="public-content" style="display: block !important; opacity: 1 !important; visibility: visible !important;">
+        
+        <div class="mb-10 p-1 rounded-3xl ">
+          <div style="height: 500px; width: 100%; position: relative;" id="map-parent">
+            <MapaEstadistico />
+          </div>
+        </div>
+
+        <div class="p-8 bg-white rounded-3xl shadow-lg border-2 border-orange-500">
+            <GraficosAdmin />
+        </div>
+    </div>
+
+    <div style="display: none !important;">
+        <div id="tabla-hoteles"></div>
+        <div id="tabla-museos"></div>
+        <div id="container-hoteles"></div>
+        <div id="container-museos"></div>
+        <select id="filtro-mes"></select>
+        <div id="welcome-title"></div>
+    </div>
+  </main>
+</Layout>
+
+<script>
+  import * as api from '../lib/dashboard/dataService';
+  import * as charts from '../lib/dashboard/chartLogic';
+  import * as map from '../lib/dashboard/mapLogic';
+
+  async function cargarTodo() {
+    try {
+      const dataH = await api.fetchDatosPublicos('reportes_hoteleria');
+      const dataM = await api.fetchDatosPublicos('reportes_museos');
+
+      console.log("Datos cargados:", { hoteles: dataH.length, museos: dataM.length });
+
+      if (dataH.length > 0 || dataM.length > 0) {
+        // Ejecutamos las funciones directamente
+        // El mapa suele ser el más delicado
+        if (map.initMap) {
+          await map.initMap(dataH, dataM);
+        }
+
+        charts.renderChartHoteles(dataH);
+        charts.renderChartMuseos(dataM);
+        charts.renderChartIntegrado(dataH, dataM);
+
+        // Forzar a los motores de renderizado a despertar
+        window.dispatchEvent(new Event('resize'));
+        console.log("Proceso de renderizado finalizado.");
+      }
+    } catch (err) {
+      console.error("Error en el script de carga:", err);
+    }
+  }
+
+  
+
+  // Ejecutamos inmediatamente
+  cargarTodo();
+</script>
