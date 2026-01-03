@@ -110,29 +110,47 @@ function actualizarInfoDepto(nombre: string | null, hoteles: any[], museos: any[
   const nameEl = document.getElementById("depto-name");
   const hEl = document.getElementById("depto-hoteles");
   const mEl = document.getElementById("depto-museos");
+  const eEl = document.getElementById("depto-entidades"); // Referencia al contador de entidades
 
+  // Obtenemos valores actuales para que la animación empiece desde donde estaba el número
   const currentH = parseInt(hEl?.textContent?.replace(/\./g, '') || "0");
   const currentM = parseInt(mEl?.textContent?.replace(/\./g, '') || "0");
+  const currentE = parseInt(eEl?.textContent?.replace(/\./g, '') || "0");
 
-  let h: number, m: number;
+  let h: number, m: number, e: number;
 
   if (!nombre) {
-    // CAMBIO: Si no hay nombre, calcular totales de toda la provincia
-    if (nameEl) nameEl.textContent = "Total Provincial (San Juan)";
+    // Escenario: Vista General Provincial
+    if (nameEl) nameEl.textContent = "Total Provincial (Últimos 30 días)";
+    
     h = hoteles.reduce((acc, r) => acc + clean(r.total_huespedes), 0);
     m = museos.reduce((acc, r) => acc + clean(r.total_visitantes), 0);
+    
+    // Contar entidades únicas en toda la provincia (últimos 30 días)
+    const idsH = hoteles.map(r => r.entidad_id);
+    const idsM = museos.map(r => r.entidad_id);
+    e = new Set([...idsH, ...idsM]).size;
+
   } else {
-    // Lógica por departamento individual
+    // Escenario: Departamento Individual seleccionado
     if (nameEl) nameEl.textContent = nombre;
     const norm = normalizar(nombre);
-    h = hoteles
-      .filter((r) => normalizar(r.entidades.departamento) === norm)
-      .reduce((a, b) => a + clean(b.total_huespedes), 0);
-    m = museos
-      .filter((r) => normalizar(r.entidades.departamento) === norm)
-      .reduce((a, b) => a + clean(b.total_visitantes), 0);
+    
+    // Filtramos los datos del mes correspondientes a este departamento
+    const filtradosH = hoteles.filter((r) => normalizar(r.entidades.departamento) === norm);
+    const filtradosM = museos.filter((r) => normalizar(r.entidades.departamento) === norm);
+    
+    h = filtradosH.reduce((a, b) => a + clean(b.total_huespedes), 0);
+    m = filtradosM.reduce((a, b) => a + clean(b.total_visitantes), 0);
+    
+    // Contar cuántas entidades distintas reportaron en este departamento este mes
+    const idsH = filtradosH.map(r => r.entidad_id);
+    const idsM = filtradosM.map(r => r.entidad_id);
+    e = new Set([...idsH, ...idsM]).size;
   }
 
+  // Ejecutamos las animaciones con los nuevos valores filtrados
   animateValue("depto-hoteles", currentH, h, 600);
   animateValue("depto-museos", currentM, m, 600);
+  if (eEl) animateValue("depto-entidades", currentE, e, 600);
 }
