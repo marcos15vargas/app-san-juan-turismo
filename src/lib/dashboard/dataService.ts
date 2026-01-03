@@ -12,14 +12,33 @@ export async function getProfile() {
 }
 
 export async function fetchHoteles(id = null) {
-    let q = supabase.from('reportes_hoteleria').select('*, entidades(*)').order('fecha_reporte', { ascending: false });
+    // Calculamos la fecha de hace 30 días
+    const hace30Dias = new Date();
+    hace30Dias.setDate(hace30Dias.getDate() - 30);
+    const fechaISO = hace30Dias.toISOString();
+
+    let q = supabase
+        .from('reportes_hoteleria')
+        .select('*, entidades(*)')
+        .gte('fecha_reporte', fechaISO) // Mayor o igual a hace 30 días
+        .order('fecha_reporte', { ascending: false });
+        
     if (id) q = q.eq('entidad_id', id);
     const { data } = await q;
     return data || [];
 }
 
 export async function fetchMuseos(id = null) {
-    let q = supabase.from('reportes_museos').select('*, entidades(*)').order('fecha_reporte', { ascending: false });
+    const hace30Dias = new Date();
+    hace30Dias.setDate(hace30Dias.getDate() - 30);
+    const fechaISO = hace30Dias.toISOString();
+
+    let q = supabase
+        .from('reportes_museos')
+        .select('*, entidades(*)')
+        .gte('fecha_reporte', fechaISO) // Mayor o igual a hace 30 días
+        .order('fecha_reporte', { ascending: false });
+        
     if (id) q = q.eq('entidad_id', id);
     const { data } = await q;
     return data || [];
